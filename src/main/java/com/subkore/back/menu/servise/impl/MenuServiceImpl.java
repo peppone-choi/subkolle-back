@@ -1,5 +1,6 @@
 package com.subkore.back.menu.servise.impl;
 
+import com.subkore.back.exception.MenuException;
 import com.subkore.back.menu.controller.MenuController;
 import com.subkore.back.menu.dto.CreateMenuRequestDto;
 import com.subkore.back.menu.dto.MenuResponseDto;
@@ -25,15 +26,18 @@ public class MenuServiceImpl implements MenuService {
     private final MenuMapper menuMapper = MenuMapper.INSTANCE;
 
     /**
-     * 모든 메뉴를 반환한다
+     * 모든 메뉴를 반환한다. 메뉴가 아예 없을 경우 예외를 던진다.
      * @return 모든 메뉴의 리스트
      * @see MenuController#getMenuList() 
      */
     @Override
     public List<MenuResponseDto> getMenuList() {
         List<Menu> menus = menuRepository.findAll();
-        menus.sort(Comparator.comparingInt(Menu::getOrder));
-        return menus.stream().map(menuMapper::menuToMenuResponseDto).toList();
+        if (menus.isEmpty()) {
+            throw new MenuException("메뉴가 없습니다.");
+        }
+        List<Menu> sortedMenus = menus.stream().sorted(Comparator.comparingInt(Menu::getOrder)).toList();
+        return sortedMenus.stream().map(menuMapper::menuToMenuResponseDto).toList();
     }
 
     /**

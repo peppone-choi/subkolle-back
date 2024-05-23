@@ -3,7 +3,6 @@ package com.subkore.back.menu.mapper;
 import com.subkore.back.menu.dto.CreateMenuRequestDto;
 import com.subkore.back.menu.dto.MenuResponseDto;
 import com.subkore.back.menu.entity.Menu;
-import lombok.experimental.UtilityClass;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
