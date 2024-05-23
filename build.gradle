@@ -37,6 +37,11 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// mapstruct mapper 사용
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	// 테스트 시 모킹을 위해 mockito 라이브러리 사용
+	testImplementation "org.mockito:mockito-core:3.+"
 }
 
 tasks.named('test') {
