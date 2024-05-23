@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author peppone-choi (peppone.choi@gmail.com)
  * @version 1.0
  */
-@RestController("/api/v1/menus")
+@RestController
 @RequiredArgsConstructor
 public class MenuController {
     private final MenuService menuService;
@@ -29,7 +29,7 @@ public class MenuController {
      * @return 전체 메뉴
      * @see MenuServiceImpl#getMenuList()
      */
-    @GetMapping()
+    @GetMapping("/api/v1/menus")
     public ResponseEntity<List<MenuResponseDto>> getMenuList() {
         List<MenuResponseDto> result = menuService.getMenuList();
         return ResponseEntity.ok().body(result);
@@ -42,7 +42,7 @@ public class MenuController {
      * @return HTTP 응답 상태코드와 등록한 메뉴 반환
      * @see MenuServiceImpl#createMenu(CreateMenuRequestDto)
      */
-    @PostMapping()
+    @PostMapping("/api/v1/menus")
     public ResponseEntity<MenuResponseDto> createMenu(@RequestBody CreateMenuRequestDto createMenuRequestDto) {
         MenuResponseDto result = menuService.createMenu(createMenuRequestDto);
         return ResponseEntity.created(URI.create("/menus/" + result.id())).body(result);
