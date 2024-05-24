@@ -84,7 +84,20 @@ class MenuServiceImplTest {
         // given
         CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder()
                 .build();
-        // when + then
+        // when
+        // then
+        assertThrows(MenuException.class, () -> menuService.createMenu(createMenuRequestDto));
+    }
+    @Test
+    void 메뉴의_입력_항목이_공백_일_경우_예외가_던져진다() {
+        // given
+        CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder()
+                .text("")
+                .linkTo("")
+                .icon("")
+                .build();
+        // when
+        // then
         assertThrows(MenuException.class, () -> menuService.createMenu(createMenuRequestDto));
     }
 }
