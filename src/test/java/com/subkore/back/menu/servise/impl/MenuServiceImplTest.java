@@ -78,4 +78,13 @@ class MenuServiceImplTest {
         assertEquals(response.text(), "test");
         assertEquals(response.linkTo(), "/");
     }
+
+    @Test
+    void 메뉴의_입력_항목이_null_일_경우_예외가_던져진다() {
+        // given
+        CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder()
+                .build();
+        // when + then
+        assertThrows(MenuException.class, () -> menuService.createMenu(createMenuRequestDto));
+    }
 }

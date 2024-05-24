@@ -88,4 +88,16 @@ class MenuControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser
+    void 메뉴_등록_시_항목이_없을_경우_예외가_던져진다() throws Exception {
+        CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder().build();
+        mockMvc.perform(post("/api/v1/menus")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(createMenuRequestDto)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
 }

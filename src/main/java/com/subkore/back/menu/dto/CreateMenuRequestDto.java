@@ -1,5 +1,7 @@
 package com.subkore.back.menu.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 
 /**
@@ -12,8 +14,11 @@ import lombok.Builder;
 @Builder
 public record CreateMenuRequestDto(
     Integer order,
+    @NotEmpty
     String icon,
+    @NotEmpty
     String text,
+    @NotEmpty
     String linkTo
 ) {
 

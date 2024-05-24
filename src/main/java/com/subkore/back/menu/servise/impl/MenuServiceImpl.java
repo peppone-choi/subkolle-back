@@ -8,10 +8,12 @@ import com.subkore.back.menu.entity.Menu;
 import com.subkore.back.menu.mapper.MenuMapper;
 import com.subkore.back.menu.repository.MenuRepository;
 import com.subkore.back.menu.servise.MenuService;
+import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Menu 관련 Controller 레이어의 메소드가 호출 될 때 실제로 실행되는 메소드들
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
+@Validated
 public class MenuServiceImpl implements MenuService {
     private final MenuRepository menuRepository;
     private final MenuMapper menuMapper = MenuMapper.INSTANCE;
@@ -48,6 +51,13 @@ public class MenuServiceImpl implements MenuService {
      */
     @Override
     public MenuResponseDto createMenu(CreateMenuRequestDto createMenuRequestDto) {
+        if (createMenuRequestDto.icon() == null ||  createMenuRequestDto.text() == null || createMenuRequestDto.linkTo() == null) {
+            throw new MenuException("메뉴의 항목은 null 일 수 없습니다.");
+        }
+        if (createMenuRequestDto.icon().isEmpty()
+                || createMenuRequestDto.text().isEmpty() || createMenuRequestDto.linkTo().isEmpty()) {
+            throw new MenuException("메뉴의 항목은 비워둘 수 없습니다.");
+        }
         Menu createdMenu = menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto);
         Menu savedMenu = menuRepository.save(createdMenu);
         return menuMapper.menuToMenuResponseDto(savedMenu);

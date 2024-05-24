@@ -4,6 +4,7 @@ import com.subkore.back.menu.dto.CreateMenuRequestDto;
 import com.subkore.back.menu.dto.MenuResponseDto;
 import com.subkore.back.menu.servise.MenuService;
 import com.subkore.back.menu.servise.impl.MenuServiceImpl;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,7 @@ public class MenuController {
      * @see MenuServiceImpl#createMenu(CreateMenuRequestDto)
      */
     @PostMapping("/api/v1/menus")
-    public ResponseEntity<MenuResponseDto> createMenu(@RequestBody CreateMenuRequestDto createMenuRequestDto) {
+    public ResponseEntity<MenuResponseDto> createMenu(@Valid @RequestBody CreateMenuRequestDto createMenuRequestDto) {
         MenuResponseDto result = menuService.createMenu(createMenuRequestDto);
         return ResponseEntity.created(URI.create("/menus/" + result.id())).body(result);
     }
