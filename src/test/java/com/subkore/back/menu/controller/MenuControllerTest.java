@@ -1,6 +1,5 @@
 package com.subkore.back.menu.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,31 +7,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.subkore.back.config.SecurityConfig;
+import com.subkore.back.exception.MenuException;
 import com.subkore.back.menu.dto.CreateMenuRequestDto;
 import com.subkore.back.menu.dto.MenuResponseDto;
 import com.subkore.back.menu.entity.Menu;
 import com.subkore.back.menu.mapper.MenuMapper;
-import com.subkore.back.menu.servise.MenuService;
+import com.subkore.back.menu.service.MenuService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.h2.H2ConsoleProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = MenuController.class)
@@ -87,6 +78,15 @@ class MenuControllerTest {
         mockMvc.perform(get("/api/v1/menus")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk());
+    }
+    @Test
+    @WithMockUser
+    void 메뉴가_없을_경우_예외가_발생한다() throws Exception {
+        when(menuService.getMenuList()).thenThrow(new MenuException("메뉴가 없습니다."));
+        mockMvc.perform(get("/api/v1/menus")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
     }
 
     @Test

@@ -22,7 +22,6 @@ public interface MenuMapper {
      * @param menu Menu Type 객체
      * @return MenuResponseDto
      */
-    @Mapping(target = "id", ignore = true)
     MenuResponseDto menuToMenuResponseDto(Menu menu);
 
     /**
@@ -30,6 +29,5 @@ public interface MenuMapper {
      * @param createMenuRequestDto DTO 객체
      * @return Menu
      */
-    @Mapping(target = "id", ignore = true)
     Menu createMenuRequestDtoToMenu(CreateMenuRequestDto createMenuRequestDto);
 }

@@ -2,8 +2,8 @@ package com.subkore.back.menu.controller;
 
 import com.subkore.back.menu.dto.CreateMenuRequestDto;
 import com.subkore.back.menu.dto.MenuResponseDto;
-import com.subkore.back.menu.servise.MenuService;
-import com.subkore.back.menu.servise.impl.MenuServiceImpl;
+import com.subkore.back.menu.service.MenuService;
+import com.subkore.back.menu.service.impl.MenuServiceImpl;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;

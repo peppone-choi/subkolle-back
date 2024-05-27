@@ -19,6 +19,7 @@ public class SecurityConfig {
             request
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .requestMatchers("api/v1/menus/**").permitAll()
+                .requestMatchers("api/v1/carousels/**").permitAll()
                 .anyRequest().authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("api/v1"
                 + "/**"))
             .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
