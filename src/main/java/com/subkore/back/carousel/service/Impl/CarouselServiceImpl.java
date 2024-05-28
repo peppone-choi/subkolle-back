@@ -20,18 +20,19 @@ public class CarouselServiceImpl implements CarouselService {
     private final CarouselMapper carouselMapper = CarouselMapper.INSTANCE;
     @Override
     public List<CarouselResponseDto> getCarouselList() {
-        List<Carousel> carouselList = carouselRepository.findAll();
-        if (carouselList.isEmpty()) {
+        List<Carousel> sortedCarouselList =
+            carouselRepository.findAllByIsDeletedFalseAndIsShowTrueOrderByOrder();
+        if (sortedCarouselList.isEmpty()) {
             throw new CarouselException("캐러셀 아이템이 존재하지 않습니다.");
         }
-        List<Carousel> sortedCarouselList =
-            carouselList.stream().sorted(Comparator.comparingInt(Carousel::getOrder)).toList();
         return sortedCarouselList.stream().map(carouselMapper::carouselToCarouselResponseDto).toList();
     }
 
     @Override
     public CarouselResponseDto createCarousel(CreateCarouselRequestDto createCarouselRequestDto) {
         Carousel carousel = carouselMapper.createCarouselRequestDtoToCarousel(createCarouselRequestDto);
+        Integer count = carouselRepository.countByIsDeletedFalse();
+        carousel.setOrder(count);
         Carousel savedCarousel = carouselRepository.save(carousel);
         return carouselMapper.carouselToCarouselResponseDto(savedCarousel);
     }

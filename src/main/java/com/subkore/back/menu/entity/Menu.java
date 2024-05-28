@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Generated;
 
 /**
@@ -33,13 +34,16 @@ public class Menu {
     /**
      * 해당 메뉴의 위치 순서
      * */
-    @Column(name = "orders")
-    private Integer order;
+    @Setter
+    private Integer menuOrder;
     /**
      * 해당 메뉴가 출력하는 아이콘
      * */
-    @Generated
     private String icon;
+    /**
+     * 해당 메뉴가 출력하는 아이콘의 대분류
+     * */
+    private String iconType;
     /**
      * 해당 메뉴의 이름으로 링크에 보여짐
      * */
@@ -50,4 +54,7 @@ public class Menu {
      * */
     @Default
     private String linkTo = "/";
+
+    @Default
+    private Boolean isDeleted = false;
 }

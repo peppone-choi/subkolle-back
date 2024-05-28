@@ -37,6 +37,7 @@ class CarouselServiceImplTest {
                 .title("test")
                 .description("test")
                 .linkTo("test")
+                .isDeleted(false)
                 .build(),
             Carousel.builder()
                 .id(1L)
@@ -44,8 +45,9 @@ class CarouselServiceImplTest {
                 .title("test2")
                 .description("test2")
                 .linkTo("test2")
+                .isDeleted(false)
                 .build());
-        when(carouselRepository.findAll()).thenReturn(carouselList);
+        when(carouselRepository.findAllByIsDeletedFalseAndIsShowTrueOrderByOrder()).thenReturn(carouselList);
         // when
         List<CarouselResponseDto> responseList = carouselService.getCarouselList();
         // then
@@ -54,7 +56,7 @@ class CarouselServiceImplTest {
     @Test
     void 캐러셀이_없을_때엔_리스트가_반환되지_않고_예외가_발생한다() {
         // given
-        when(carouselRepository.findAll()).thenReturn(List.of());
+        when(carouselRepository.findAllByIsDeletedFalseAndIsShowTrueOrderByOrder()).thenReturn(List.of());
         // when
         CarouselException e = assertThrows(CarouselException.class, (() -> carouselService.getCarouselList()));
         // then
@@ -64,7 +66,6 @@ class CarouselServiceImplTest {
     void 캐러셀을_등록할_수_있다() {
         // given
         CreateCarouselRequestDto carouselRequestDto = CreateCarouselRequestDto.builder()
-            .order(0)
             .title("test")
                 .description("test")
                 .linkTo("test")

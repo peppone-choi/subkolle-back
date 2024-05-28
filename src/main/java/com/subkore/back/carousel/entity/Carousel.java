@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 메인의 캐러셀 아이템 엔티티
@@ -29,7 +30,10 @@ public class Carousel {
     private String imageUrl;
     private String linkTo;
     @Column(name = "orders")
+    @Setter
     private Integer order;
     @Builder.Default
     private Boolean isShow = true;
+    @Builder.Default
+    private Boolean isDeleted = false;
 }

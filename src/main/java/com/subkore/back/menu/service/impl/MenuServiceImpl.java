@@ -33,11 +33,10 @@ public class MenuServiceImpl implements MenuService {
      */
     @Override
     public List<MenuResponseDto> getMenuList() {
-        List<Menu> menus = menuRepository.findAll();
-        if (menus.isEmpty()) {
+        List<Menu> sortedMenus = menuRepository.findAllByIsDeletedFalseOrderByMenuOrder();
+        if (sortedMenus.isEmpty()) {
             throw new MenuException("메뉴가 없습니다.");
         }
-        List<Menu> sortedMenus = menus.stream().sorted(Comparator.comparingInt(Menu::getOrder)).toList();
         return sortedMenus.stream().map(menuMapper::menuToMenuResponseDto).toList();
     }
 
@@ -57,6 +56,9 @@ public class MenuServiceImpl implements MenuService {
             throw new MenuException("메뉴의 항목은 비워둘 수 없습니다.");
         }
         Menu createdMenu = menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto);
+        Integer count = menuRepository.countByIsDeletedFalse();
+        createdMenu.setMenuOrder(count);
+        System.out.println(createdMenu.getMenuOrder());
         Menu savedMenu = menuRepository.save(createdMenu);
         return menuMapper.menuToMenuResponseDto(savedMenu);
     }

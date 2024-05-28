@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 
 /**
- * @param order 몇번째 메뉴인지
  * @param icon 아이콘
  * @param text 해당 메뉴의 이름
  * @param linkTo 해당 메뉴가 어디로 이동시키는지
@@ -13,7 +12,8 @@ import lombok.Builder;
  */
 @Builder
 public record CreateMenuRequestDto(
-    Integer order,
+    @NotEmpty
+    String iconType,
     @NotEmpty
     String icon,
     @NotEmpty

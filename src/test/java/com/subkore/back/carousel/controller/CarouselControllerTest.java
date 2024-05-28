@@ -61,7 +61,6 @@ class CarouselControllerTest {
     void 캐러셀을_등록할_수_있다() throws Exception {
         // given
         CreateCarouselRequestDto createCarouselRequestDto = CreateCarouselRequestDto.builder()
-                .order(0)
                 .title("test")
                 .description("test")
                 .linkTo("test")

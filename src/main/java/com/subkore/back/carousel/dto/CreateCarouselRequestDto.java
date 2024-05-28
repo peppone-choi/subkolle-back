@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record CreateCarouselRequestDto(
-    Integer order,
     String title,
     String description,
     String imageUrl,

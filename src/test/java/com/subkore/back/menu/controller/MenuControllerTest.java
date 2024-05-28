@@ -41,7 +41,6 @@ class MenuControllerTest {
         CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder()
                 .icon("test")
                 .text("test")
-                .order(0)
                 .linkTo("/").build();
         MenuResponseDto menuResponseDto = menuMapper.menuToMenuResponseDto(
                 menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto));
@@ -59,14 +58,14 @@ class MenuControllerTest {
     void 메뉴가_있을_경우_메뉴_리스트를_반환한다() throws Exception {
         List<Menu> menuList = List.of(Menu.builder()
                         .id(0L)
-                        .order(0)
+                        .menuOrder(0)
                         .icon("test")
                         .text("test")
                         .linkTo("test")
                         .build(),
                 Menu.builder()
                         .id(1L)
-                        .order(1)
+                        .menuOrder(1)
                         .icon("test2")
                         .text("test2")
                         .linkTo("test2")
