@@ -7,7 +7,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CarouselRepository extends JpaRepository<Carousel, Long> {
+
     List<Carousel> findAllByIsDeletedFalseOrderByOrder();
+
     List<Carousel> findAllByIsDeletedFalseAndIsShowTrueOrderByOrder();
+
     Integer countByIsDeletedFalse();
 }

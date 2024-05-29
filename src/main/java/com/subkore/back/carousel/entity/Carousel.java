@@ -13,15 +13,18 @@ import lombok.Setter;
 
 /**
  * 메인의 캐러셀 아이템 엔티티
+ *
  * @author peppone-choi (peppone.choi@gmail.com)
  * @version 1.0
- * */
+ */
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class Carousel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

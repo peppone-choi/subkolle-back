@@ -1,6 +1,5 @@
 package com.subkore.back.menu.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,10 +10,10 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Generated;
 
 /**
  * Menu의 Entity Class
+ *
  * @author peppone-choi (peppone.choi@gmail.com)
  * @version 1.0
  */
@@ -23,6 +22,7 @@ import org.hibernate.annotations.Generated;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class Menu {
 
     /**
@@ -33,25 +33,25 @@ public class Menu {
     private Long id;
     /**
      * 해당 메뉴의 위치 순서
-     * */
+     */
     @Setter
     private Integer menuOrder;
     /**
      * 해당 메뉴가 출력하는 아이콘
-     * */
+     */
     private String icon;
     /**
      * 해당 메뉴가 출력하는 아이콘의 대분류
-     * */
+     */
     private String iconType;
     /**
      * 해당 메뉴의 이름으로 링크에 보여짐
-     * */
+     */
     @Default
     private String text = "메뉴";
     /**
      * 해당 메뉴를 클릭하면 이동하는 경로로 상대 경로임
-     * */
+     */
     @Default
     private String linkTo = "/";
 

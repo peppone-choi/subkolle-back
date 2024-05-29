@@ -13,19 +13,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request ->
-            request
-                .requestMatchers(PathRequest.toH2Console()).permitAll()
-                .requestMatchers("api/v1/menus/**").permitAll()
-                .requestMatchers("api/v1/carousels/**").permitAll()
-                .anyRequest().authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("api/v1"
+                request
+                    .requestMatchers(PathRequest.toH2Console()).permitAll()
+                    .requestMatchers("api/v1/menus/**").permitAll()
+                    .requestMatchers("api/v1/carousels/**").permitAll()
+                    .requestMatchers("api/v1/events/**").permitAll()
+                    .anyRequest().authenticated()).csrf(csrf -> csrf.ignoringRequestMatchers("api/v1"
                 + "/**").ignoringRequestMatchers(PathRequest.toH2Console()))
             .headers(headers -> headers.frameOptions(FrameOptionsConfig::sameOrigin));
 
         return http.build();
     }
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

@@ -1,6 +1,6 @@
 package com.subkore.back.menu.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.subkore.back.menu.entity.Menu;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @ActiveProfiles("test")
 class MenuRepositoryTest {
+
     @Autowired
     private MenuRepository menuRepository;
 

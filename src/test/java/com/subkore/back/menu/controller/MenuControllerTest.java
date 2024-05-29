@@ -35,57 +35,62 @@ class MenuControllerTest {
     @Autowired
     private MockMvc mockMvc;
     private MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class).INSTANCE;
+
     @Test
     @WithMockUser(username = "테스트")
     void 메뉴를_등록_할_수_있다() throws Exception {
         CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder()
-                .icon("test")
-                .text("test")
-                .linkTo("/").build();
+            .iconType("test")
+            .icon("test")
+            .text("test")
+            .linkTo("/").build();
         MenuResponseDto menuResponseDto = menuMapper.menuToMenuResponseDto(
-                menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto));
+            menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto));
         when(menuService.createMenu(createMenuRequestDto)).thenReturn(menuResponseDto);
         mockMvc.perform(post("/api/v1/menus")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(createMenuRequestDto)))
-                .andDo(print())
-                .andExpect(status().isCreated());
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().registerModule(new JavaTimeModule())
+                    .writeValueAsString(createMenuRequestDto)))
+            .andDo(print())
+            .andExpect(status().isCreated());
 
     }
+
     @Test
     @WithMockUser(username = "테스트")
     void 메뉴가_있을_경우_메뉴_리스트를_반환한다() throws Exception {
         List<Menu> menuList = List.of(Menu.builder()
-                        .id(0L)
-                        .menuOrder(0)
-                        .icon("test")
-                        .text("test")
-                        .linkTo("test")
-                        .build(),
-                Menu.builder()
-                        .id(1L)
-                        .menuOrder(1)
-                        .icon("test2")
-                        .text("test2")
-                        .linkTo("test2")
-                        .build());
+                .id(0L)
+                .menuOrder(0)
+                .icon("test")
+                .text("test")
+                .linkTo("test")
+                .build(),
+            Menu.builder()
+                .id(1L)
+                .menuOrder(1)
+                .icon("test2")
+                .text("test2")
+                .linkTo("test2")
+                .build());
 
         List<MenuResponseDto> dtoList = menuList.stream()
-                .map(menu -> menuMapper.menuToMenuResponseDto(menu)).toList();
+            .map(menu -> menuMapper.menuToMenuResponseDto(menu)).toList();
         when(menuService.getMenuList()).thenReturn(dtoList);
         mockMvc.perform(get("/api/v1/menus")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isOk());
+            .andDo(print()).andExpect(status().isOk());
     }
+
     @Test
     @WithMockUser
     void 메뉴가_없을_경우_예외가_발생한다() throws Exception {
         when(menuService.getMenuList()).thenThrow(new MenuException("메뉴가 없습니다."));
         mockMvc.perform(get("/api/v1/menus")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().is4xxClientError());
+            .andDo(print())
+            .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -93,10 +98,11 @@ class MenuControllerTest {
     void 메뉴_등록_시_항목이_없을_경우_예외가_던져진다() throws Exception {
         CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder().build();
         mockMvc.perform(post("/api/v1/menus")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(createMenuRequestDto)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError());
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().registerModule(new JavaTimeModule())
+                    .writeValueAsString(createMenuRequestDto)))
+            .andDo(print())
+            .andExpect(status().is4xxClientError());
     }
 }
