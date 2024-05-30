@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,12 @@ public class EventController {
         return ResponseEntity.ok().body(result);
     }
 
+    @GetMapping("/api/v1/events/{id}")
+    public ResponseEntity<EventResponseDto> getEvent(@PathVariable("id") Long id) {
+        EventResponseDto result = eventService.getEvent(id);
+        return ResponseEntity.ok().body(result);
+    }
+
     @PostMapping("/api/v1/events")
     public ResponseEntity<EventResponseDto> createEvent(
         @RequestBody CreateEventRequestDto createEventRequestDto) {
@@ -48,6 +55,18 @@ public class EventController {
     public ResponseEntity<EventResponseDto> updateEvent(@PathVariable("id") Long id,
         @RequestBody UpdateEventRequestDto updateEventRequestDto) {
         EventResponseDto result = eventService.updateEvent(id, updateEventRequestDto);
+        return ResponseEntity.created(URI.create("/api/v1/events/" + result.id())).body(result);
+    }
+
+    @DeleteMapping("/api/v1/events/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable("id") Long id) {
+        eventService.deleteEvent(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/api/v1/events/{id}/recover")
+    public ResponseEntity<EventResponseDto> recoverEvent(@PathVariable("id") Long id) {
+        EventResponseDto result = eventService.recoverEvent(id);
         return ResponseEntity.created(URI.create("/api/v1/events/" + result.id())).body(result);
     }
 }

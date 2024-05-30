@@ -9,5 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    List<Event> findAllByStateIn(List<EventState> stateList);
+    List<Event> findAllByStateInAndIsDeletedFalseAndIsShowTrue(List<EventState> stateList);
+    List<Event> findAllByIsDeletedFalse();
+    List<Event> findAllByIsDeletedFalseAndIsShowTrue();
 }

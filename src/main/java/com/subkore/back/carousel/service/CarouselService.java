@@ -12,4 +12,8 @@ public interface CarouselService {
     CarouselResponseDto createCarousel(CreateCarouselRequestDto createCarouselRequestDto);
 
     CarouselResponseDto updateCarousel(Long id, UpdateCarouselRequestDto updateCarouselRequestDto);
+
+    void deleteCarousel(long id);
+
+    void recoverCarousel(long id);
 }

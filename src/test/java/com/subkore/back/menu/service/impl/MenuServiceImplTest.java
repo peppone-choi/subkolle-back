@@ -142,4 +142,81 @@ class MenuServiceImplTest {
         assertThrows(MenuException.class,
             () -> menuService.updateMenu(1L, UpdateMenuRequestDto.builder().build()));
     }
+
+    @Test
+    void 메뉴가_없을_때_삭제_시_예외가_던져진다() {
+        // given
+        when(repository.existsById(1L)).thenReturn(false);
+        // when
+        // then
+        assertThrows(MenuException.class,
+            () -> menuService.deleteMenu(1L));
+    }
+
+    @Test
+    void 메뉴가_삭제된다() {
+        // given
+        Menu menu = Menu.builder()
+            .id(1L)
+            .menuOrder(0)
+            .icon("test")
+            .text("test")
+            .linkTo("test")
+            .isDeleted(false)
+            .build();
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(menu));
+        // when
+        menuService.deleteMenu(1L);
+        // then
+        assertEquals(menu.getIsDeleted(), true);
+    }
+
+    @Test
+    void 메뉴를_되살린다() {
+        // given
+        Menu menu = Menu.builder()
+            .id(1L)
+            .menuOrder(0)
+            .icon("test")
+            .text("test")
+            .linkTo("test")
+            .isDeleted(true)
+            .build();
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(menu));
+        // when
+        menuService.recoverMenu(1L);
+        // then
+        assertEquals(menu.getIsDeleted(), false);
+    }
+
+    @Test
+    void 없는_메뉴를_되살릴_경우_예외가_발생한다() {
+        // given
+        when(repository.existsById(1L)).thenReturn(false);
+        // when
+        // then
+        assertThrows(MenuException.class,
+            () -> menuService.recoverMenu(1L));
+    }
+
+    @Test
+    void 삭제_되어있지_않은_메뉴를_되살릴_경우_예외가_발생한다() {
+        // given
+        Menu menu = Menu.builder()
+            .id(1L)
+            .menuOrder(0)
+            .icon("test")
+            .text("test")
+            .linkTo("test")
+            .isDeleted(false)
+            .build();
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(java.util.Optional.of(menu));
+        // when
+        // then
+        assertThrows(MenuException.class,
+            () -> menuService.recoverMenu(1L));
+    }
 }

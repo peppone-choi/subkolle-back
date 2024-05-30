@@ -51,5 +51,15 @@ public class Event {
     @Embedded
     private EventDetail detail;
     @Default
+    private Boolean isShow = true;
+    @Default
     private Boolean isDeleted = false;
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void recover() {
+        this.isDeleted = false;
+    }
 }

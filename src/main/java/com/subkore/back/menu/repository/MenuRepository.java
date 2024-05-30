@@ -15,6 +15,5 @@ import org.springframework.stereotype.Repository;
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findAllByIsDeletedFalseOrderByMenuOrder();
-
     Integer countByIsDeletedFalse();
 }

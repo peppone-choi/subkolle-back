@@ -10,6 +10,7 @@ import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,5 +62,17 @@ public class MenuController {
         @RequestBody UpdateMenuRequestDto updateMenuRequestDto) {
         MenuResponseDto result = menuService.updateMenu(id, updateMenuRequestDto);
         return ResponseEntity.created(URI.create("/menus/" + result.id())).body(result);
+    }
+
+    @DeleteMapping("/api/v1/menus/{id}")
+    public ResponseEntity<Void> deleteMenu(@PathVariable("id") Long id) {
+        menuService.deleteMenu(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/api/v1/menus/{id}/recover")
+    public ResponseEntity<Void> recoverMenu(@PathVariable("id") Long id) {
+        MenuResponseDto menuResponseDto = menuService.recoverMenu(id);
+        return ResponseEntity.created(URI.create("/menus/" + menuResponseDto.id())).build();
     }
 }

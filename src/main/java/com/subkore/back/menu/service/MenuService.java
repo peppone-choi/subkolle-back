@@ -12,4 +12,8 @@ public interface MenuService {
     MenuResponseDto createMenu(CreateMenuRequestDto createMenuRequestDto);
 
     MenuResponseDto updateMenu(Long id, UpdateMenuRequestDto updateMenuRequestDto);
+
+    void deleteMenu(long id);
+
+    MenuResponseDto recoverMenu(long id);
 }

@@ -57,4 +57,12 @@ public class Menu {
 
     @Default
     private Boolean isDeleted = false;
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void recover() {
+        this.isDeleted = false;
+    }
 }

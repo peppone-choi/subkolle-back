@@ -11,9 +11,11 @@ import com.subkore.back.exception.CarouselException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CarouselServiceImpl implements CarouselService {
 
     private final CarouselRepository carouselRepository;
@@ -50,6 +52,32 @@ public class CarouselServiceImpl implements CarouselService {
             return carouselMapper.carouselToCarouselResponseDto(savedCarousel);
         } else {
             throw new CarouselException("존재하지 않는 캐러셀 아이템입니다.");
+        }
+    }
+
+    @Override
+    public void deleteCarousel(long id) {
+        if (carouselRepository.existsById(id) && !carouselRepository.findById(id).get().getIsDeleted()) {
+            Carousel carousel = carouselRepository.findById(id).get();
+            carousel.setIsDeleted(true);
+            carouselRepository.save(carousel);
+        } else if (!carouselRepository.existsById(id)) {
+            throw new CarouselException("존재하지 않는 캐러셀 아이템입니다.");
+        } else {
+            throw new CarouselException("이미 삭제된 캐러셀 아이템입니다.");
+        }
+    }
+
+    @Override
+    public void recoverCarousel(long id) {
+        if (carouselRepository.existsById(id) && carouselRepository.findById(id).get().getIsDeleted()) {
+            Carousel carousel = carouselRepository.findById(id).get();
+            carousel.setIsDeleted(false);
+            carouselRepository.save(carousel);
+        } else if (!carouselRepository.existsById(id)) {
+            throw new CarouselException("존재하지 않는 캐러셀 아이템입니다.");
+        } else {
+            throw new CarouselException("이미 복구된 캐러셀 아이템입니다.");
         }
     }
 }

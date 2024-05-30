@@ -20,6 +20,7 @@ public interface EventMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "isShow", ignore = true)
     Event createEventRequestDtoToEvent(CreateEventRequestDto createEventRequestDto);
 
     @Mapping(target = "id", ignore = true)

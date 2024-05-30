@@ -12,6 +12,7 @@ import com.subkore.back.menu.service.MenuService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Menu 관련 Controller 레이어의 메소드가 호출 될 때 실제로 실행되는 메소드들 실제로 서버에서 동작하는 로직이나 행동이 여기서 실행된다
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
  * @author peppone-choi (peppone.choi@gmail.com)
  * @version 1.0
  */
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class MenuServiceImpl implements MenuService {
@@ -74,6 +76,31 @@ public class MenuServiceImpl implements MenuService {
             return menuMapper.menuToMenuResponseDto(savedMenu);
         } else {
             throw new MenuException("존재하지 않는 메뉴입니다.");
+        }
+    }
+
+    @Override
+    public void deleteMenu(long id) {
+        if (menuRepository.existsById(id)) {
+            Menu menu = menuRepository.findById(id).get();
+            menu.delete();
+            menuRepository.save(menu);
+        } else {
+            throw new MenuException("존재하지 않는 메뉴입니다.");
+        }
+    }
+
+    @Override
+    public MenuResponseDto recoverMenu(long id) {
+        if (menuRepository.existsById(id) && menuRepository.findById(id).get().getIsDeleted()) {
+            Menu menu = menuRepository.findById(id).get();
+            menu.recover();
+            Menu savedMenu = menuRepository.save(menu);
+            return menuMapper.menuToMenuResponseDto(savedMenu);
+        } else if (!menuRepository.existsById(id)) {
+            throw new MenuException("존재하지 않는 메뉴입니다.");
+        } else {
+            throw new MenuException("삭제 되지 않은 메뉴입니다.");
         }
     }
 }

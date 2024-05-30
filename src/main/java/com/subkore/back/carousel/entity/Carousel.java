@@ -33,10 +33,17 @@ public class Carousel {
     private String imageUrl;
     private String linkTo;
     @Column(name = "orders")
-    @Setter
     private Integer order;
     @Builder.Default
     private Boolean isShow = true;
     @Builder.Default
     private Boolean isDeleted = false;
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void recover() {
+        this.isDeleted = false;
+    }
 }

@@ -126,4 +126,90 @@ class CarouselServiceImplTest {
         assertThrows(CarouselException.class,
             () -> carouselService.updateCarousel(0L, carouselRequestDto));
     }
+
+    @Test
+    void 캐러셀을_삭제할_수_있다() {
+        // given
+        Carousel carousel = Carousel.builder()
+            .id(0L)
+            .order(0)
+            .title("test")
+            .description("test")
+            .linkTo("test")
+            .isDeleted(false)
+            .build();
+        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
+        when(carouselRepository.existsById(0L)).thenReturn(true);
+        // when
+        carouselService.deleteCarousel(0L);
+        // then
+        assertEquals(carousel.getIsDeleted(), true);
+    }
+
+    @Test
+    void 캐러셀이_존재하지_않는_경우_삭제가_불가능하고_예외가_발생한다() {
+        // given
+        when(carouselRepository.existsById(0L)).thenReturn(false);
+        // when
+        // then
+        assertThrows(CarouselException.class,
+            () -> carouselService.deleteCarousel(0L));
+    }
+
+    @Test
+    void 이미_삭제된_캐러셀을_삭제할_시_예외가_발생한다() {
+        // given
+        Carousel carousel = Carousel.builder()
+            .id(0L)
+            .order(0)
+            .title("test")
+            .description("test")
+            .linkTo("test")
+            .isDeleted(true)
+            .build();
+        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
+        when(carouselRepository.existsById(0L)).thenReturn(true);
+        // when
+        // then
+        assertThrows(CarouselException.class,
+            () -> carouselService.deleteCarousel(0L));
+    }
+
+    @Test
+    void 삭제된_캐러셀을_복구할_수_있다() {
+        // given
+        Carousel carousel = Carousel.builder()
+            .id(0L)
+            .order(0)
+            .title("test")
+            .description("test")
+            .linkTo("test")
+            .isDeleted(true)
+            .build();
+        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
+        when(carouselRepository.existsById(0L)).thenReturn(true);
+        // when
+        carouselService.recoverCarousel(0L);
+        // then
+        assertEquals(carousel.getIsDeleted(), false);
+    }
+
+    @Test
+    void 이미_복구된_캐러셀을_다시_복구_할_수_없다() {
+        // given
+        Carousel carousel = Carousel.builder()
+            .id(0L)
+            .order(0)
+            .title("test")
+            .description("test")
+            .linkTo("test")
+            .isDeleted(false)
+            .build();
+        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
+        when(carouselRepository.existsById(0L)).thenReturn(true);
+        // when
+        // then
+        assertThrows(CarouselException.class,
+            () -> carouselService.recoverCarousel(0L));
+    }
 }

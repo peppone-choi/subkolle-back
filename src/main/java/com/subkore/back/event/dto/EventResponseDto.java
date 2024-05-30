@@ -19,7 +19,9 @@ public record EventResponseDto(
     EventState state,
     String location,
     List<String> genreAndKeyword,
-    EventDetailResponseDto detail
+    EventDetailResponseDto detail,
+    Boolean isShow,
+    Boolean isDeleted
 ) {
 
 }

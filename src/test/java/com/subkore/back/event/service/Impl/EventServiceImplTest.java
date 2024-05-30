@@ -93,7 +93,8 @@ class EventServiceImplTest {
                     .description("test")
                     .build())
                 .build());
-        when(eventRepository.findAllByStateIn(List.of(BEFORE_PROCEEDING, PROCEEDING))).thenReturn(
+        when(eventRepository.findAllByStateInAndIsDeletedFalseAndIsShowTrue(
+            List.of(BEFORE_PROCEEDING, PROCEEDING))).thenReturn(
             eventList);
         // when
         List<EventResponseDto> responseList =
@@ -106,7 +107,8 @@ class EventServiceImplTest {
     @Test
     void 준비중이거나_열린_행사_리스트가_없다면_예외를_반환한다() {
         // given
-        when(eventRepository.findAllByStateIn(List.of(BEFORE_PROCEEDING, PROCEEDING))).thenReturn(
+        when(eventRepository.findAllByStateInAndIsDeletedFalseAndIsShowTrue(
+            List.of(BEFORE_PROCEEDING, PROCEEDING))).thenReturn(
             List.of());
         // when + then
         assertThrows(EventException.class,
@@ -309,6 +311,7 @@ class EventServiceImplTest {
                 .link("test")
                 .description("test")
                 .build())
+            .isShow(true)
             .build();
         UpdateEventRequestDto updateEventRequestDto = UpdateEventRequestDto.builder()
             .title("test")
@@ -334,6 +337,7 @@ class EventServiceImplTest {
                 .link("test")
                 .description("test")
                 .build())
+            .isShow(true)
             .build();
         when(eventRepository.existsById(1L)).thenReturn(true);
         when(eventRepository.findById(1L)).thenReturn(java.util.Optional.of(event));
@@ -377,5 +381,184 @@ class EventServiceImplTest {
         // when + then
         assertThrows(EventException.class,
             () -> eventService.updateEvent(1L, updateEventRequestDto));
+    }
+
+    @Test
+    void 이벤트를_삭제할_수_있다() {
+        Event event = Event.builder()
+            .id(1L)
+            .title("test")
+            .headerImage("test")
+            .isLongTimeEvent(false)
+            .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
+            .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
+            .tag(EventTag.ETC)
+            .isOverNight(false)
+            .state(WILL_UPDATE)
+            .location("test")
+            .genreAndKeyword(new ArrayList<>(List.of("test", "test2")))
+            .detail(EventDetail.builder()
+                .price(List.of(
+                    Price.builder()
+                        .option("성인")
+                        .price(10000)
+                        .build(),
+                    Price.builder()
+                        .option("청소년")
+                        .price(5000)
+                        .build()))
+                .link("test")
+                .description("test")
+                .build())
+            .isShow(true)
+            .build();
+        when(eventRepository.existsById(1L)).thenReturn(true);
+        when(eventRepository.findById(1L)).thenReturn(java.util.Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+        // when
+        eventService.deleteEvent(1L);
+        // then
+        assertEquals(event.getIsDeleted(), true);
+    }
+
+    @Test
+    void 삭제할_이벤트가_존재하지_않으면_예외를_반환한다() {
+        // given
+        // when + then
+        assertThrows(EventException.class,
+            () -> eventService.deleteEvent(1L));
+    }
+
+    @Test
+    void 삭제된_이벤트를_복구할_수_있다() {
+        Event event = Event.builder()
+            .id(1L)
+            .title("test")
+            .headerImage("test")
+            .isLongTimeEvent(false)
+            .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
+            .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
+            .tag(EventTag.ETC)
+            .isOverNight(false)
+            .state(WILL_UPDATE)
+            .location("test")
+            .genreAndKeyword(new ArrayList<>(List.of("test", "test2")))
+            .detail(EventDetail.builder()
+                .price(List.of(
+                    Price.builder()
+                        .option("성인")
+                        .price(10000)
+                        .build(),
+                    Price.builder()
+                        .option("청소년")
+                        .price(5000)
+                        .build()))
+                .link("test")
+                .description("test")
+                .build())
+            .isShow(true)
+            .isDeleted(true)
+            .build();
+        when(eventRepository.existsById(1L)).thenReturn(true);
+        when(eventRepository.findById(1L)).thenReturn(java.util.Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+        // when
+        EventResponseDto response = eventService.recoverEvent(1L);
+        // then
+        assertEquals(response.isDeleted(), false);
+    }
+
+    @Test
+    void 복구할_이벤트가_존재하지_않으면_예외를_반환한다() {
+        // given
+        // when + then
+        assertThrows(EventException.class,
+            () -> eventService.recoverEvent(1L));
+    }
+
+    @Test
+    void 이미_복구된_이벤트를_복구하려_하면_예외를_반환한다() {
+        // given
+        Event event = Event.builder()
+            .id(1L)
+            .title("test")
+            .headerImage("test")
+            .isLongTimeEvent(false)
+            .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
+            .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
+            .tag(EventTag.ETC)
+            .isOverNight(false)
+            .state(WILL_UPDATE)
+            .location("test")
+            .genreAndKeyword(new ArrayList<>(List.of("test", "test2")))
+            .detail(EventDetail.builder()
+                .price(List.of(
+                    Price.builder()
+                        .option("성인")
+                        .price(10000)
+                        .build(),
+                    Price.builder()
+                        .option("청소년")
+                        .price(5000)
+                        .build()))
+                .link("test")
+                .description("test")
+                .build())
+            .isShow(true)
+            .isDeleted(false)
+            .build();
+        when(eventRepository.existsById(1L)).thenReturn(true);
+        when(eventRepository.findById(1L)).thenReturn(java.util.Optional.of(event));
+        // when + then
+        assertThrows(EventException.class,
+            () -> eventService.recoverEvent(1L));
+    }
+
+    @Test
+    void 특정한_이벤트의_정보를_확인할_수_있다() {
+        // given
+        Event event = Event.builder()
+            .id(1L)
+            .title("test")
+            .headerImage("test")
+            .isLongTimeEvent(false)
+            .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
+            .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
+            .tag(EventTag.ETC)
+            .isOverNight(false)
+            .state(WILL_UPDATE)
+            .location("test")
+            .genreAndKeyword(new ArrayList<>(List.of("test", "test2")))
+            .detail(EventDetail.builder()
+                .price(List.of(
+                    Price.builder()
+                        .option("성인")
+                        .price(10000)
+                        .build(),
+                    Price.builder()
+                        .option("청소년")
+                        .price(5000)
+                        .build()))
+                .link("test")
+                .description("test")
+                .build())
+            .isShow(true)
+            .isDeleted(false)
+            .build();
+        when(eventRepository.existsById(1L)).thenReturn(true);
+        when(eventRepository.findById(1L)).thenReturn(java.util.Optional.of(event));
+        // when
+        EventResponseDto response = eventService.getEvent(1L);
+        // then
+        assertEquals(response.id(), 1L);
+    }
+
+    @Test
+    void 특정한_이벤트가_존재하지_않으면_예외를_반환한다() {
+        // given
+        when(eventRepository.existsById(1L)).thenReturn(false);
+        // when + then
+        assertThrows(EventException.class,
+            () -> eventService.getEvent(1L));
     }
 }

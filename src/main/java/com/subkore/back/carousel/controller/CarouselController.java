@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,4 +42,15 @@ public class CarouselController {
         return ResponseEntity.created(URI.create("/carousels/" + result.id())).body(result);
     }
 
+    @DeleteMapping("/api/v1/carousels/{id}")
+    public ResponseEntity<Void> deleteCarousel(@PathVariable("id") Long id) {
+        carouselService.deleteCarousel(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/api/v1/carousels/{id}/recover")
+    public ResponseEntity<Void> recoverCarousel(@PathVariable("id") Long id) {
+        carouselService.recoverCarousel(id);
+        return ResponseEntity.noContent().build();
+    }
 }

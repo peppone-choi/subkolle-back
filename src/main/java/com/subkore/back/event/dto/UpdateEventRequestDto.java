@@ -16,7 +16,8 @@ public record UpdateEventRequestDto(
     String state,
     String location,
     List<String> genreAndKeyword,
-    EventDetail detail
+    EventDetail detail,
+    Boolean isShow
 ) {
 
 }
