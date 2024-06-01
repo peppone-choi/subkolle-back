@@ -69,6 +69,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventResponseDto getEventByShortCut(String shortcut) {
+        if (eventRepository.existsByShortcutAndIsDeletedFalseAndIsShowTrue(shortcut)) {
+            Event event =
+                eventRepository.findEventByShortcutAndIsDeletedFalseAndIsShowTrue(shortcut);
+            return eventMapper.eventToEventResponseDto(event);
+        } else {
+            throw new EventException("해당하는 이벤트가 없습니다.");
+        }
+    }
+
+    @Override
     public EventResponseDto updateEvent(Long id, UpdateEventRequestDto updateEventRequestDto) {
         if (eventRepository.existsById(id)) {
             Event event = eventRepository.findById(id).get();

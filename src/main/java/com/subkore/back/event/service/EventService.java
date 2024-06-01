@@ -24,4 +24,6 @@ public interface EventService {
     EventResponseDto getEvent(Long id);
 
     List<EventResponseDto> getEventListByTag(EventTag eventTag);
+
+    EventResponseDto getEventByShortCut(String shortcut);
 }

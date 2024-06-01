@@ -10,12 +10,14 @@ public record CreateEventRequestDto(
     String title,
     String headerImage,
     Boolean isLongTimeEvent,
+    String transport,
     String startTime,
     String endTime,
     List<EventTag> tag,
     Boolean isOverNight,
     String state,
     String location,
+    String detailLocation,
     List<String> genreAndKeyword,
     EventDetail detail
 ) {

@@ -15,4 +15,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByIsDeletedFalseAndIsShowTrue();
     List<Event> findAllByTagContainsAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
     boolean existsByTagContainsAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
+    Event findEventByShortcutAndIsDeletedFalseAndIsShowTrue(String shortcut);
+    boolean existsByShortcutAndIsDeletedFalseAndIsShowTrue(String shortcut);
 }

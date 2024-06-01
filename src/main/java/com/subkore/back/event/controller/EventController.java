@@ -45,6 +45,12 @@ public class EventController {
         return ResponseEntity.ok().body(result);
     }
 
+    @GetMapping("/api/v1/events/shortcut/{uuid}")
+    public ResponseEntity<EventResponseDto> getEventByShortcut(@PathVariable("uuid") String shortcut) {
+        EventResponseDto result = eventService.getEventByShortCut(shortcut);
+        return ResponseEntity.ok().body(result);
+    }
+
     @PostMapping("/api/v1/events")
     public ResponseEntity<EventResponseDto> createEvent(
         @RequestBody CreateEventRequestDto createEventRequestDto) {
