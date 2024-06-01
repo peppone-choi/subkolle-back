@@ -13,6 +13,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByStateInAndIsDeletedFalseAndIsShowTrue(List<EventState> stateList);
     List<Event> findAllByIsDeletedFalse();
     List<Event> findAllByIsDeletedFalseAndIsShowTrue();
-    List<Event> findAllByTagAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
-    boolean existsByTagAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
+    List<Event> findAllByTagContainsAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
+    boolean existsByTagContainsAndIsDeletedFalseAndIsShowTrue(EventTag eventTag);
 }

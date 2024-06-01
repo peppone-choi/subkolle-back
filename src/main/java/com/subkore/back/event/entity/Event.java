@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,15 +38,15 @@ public class Event {
     private Boolean isLongTimeEvent;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    @Enumerated(value = EnumType.STRING)
-    private EventTag tag;
+    @ElementCollection
+    @Default
+    private List<EventTag> tag = new ArrayList<>();
     private Boolean isOverNight;
     @Enumerated(value = EnumType.STRING)
     @Default
     private EventState state = EventState.WILL_UPDATE;
     private String location;
     @ElementCollection
-    @CollectionTable(name = "event_genre_and_keyword")
     @Default
     private List<String> genreAndKeyword = new ArrayList<>();
     @Embedded

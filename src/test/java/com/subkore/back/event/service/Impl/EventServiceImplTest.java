@@ -617,9 +617,9 @@ class EventServiceImplTest {
                     .description("test")
                     .build())
                 .build());
-        when(eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(
+        when(eventRepository.existsByTagContainsAndIsDeletedFalseAndIsShowTrue(
             EventTag.EXHIBITION_AND_SALE)).thenReturn(true);
-        when(eventRepository.findAllByTagAndIsDeletedFalseAndIsShowTrue(
+        when(eventRepository.findAllByTagContainsAndIsDeletedFalseAndIsShowTrue(
             EventTag.EXHIBITION_AND_SALE)).thenReturn(
             eventList);
 
@@ -636,7 +636,7 @@ class EventServiceImplTest {
     @Test
     void 태그에_따른_이벤트가_없다면_예외를_반환한다() {
         // given
-        when(eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(
+        when(eventRepository.existsByTagContainsAndIsDeletedFalseAndIsShowTrue(
             EventTag.EXHIBITION_AND_SALE)).thenReturn(false);
         // when + then
         assertThrows(EventException.class,

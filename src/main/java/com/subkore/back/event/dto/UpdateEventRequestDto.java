@@ -11,7 +11,7 @@ public record UpdateEventRequestDto(
     Boolean isLongTimeEvent,
     String startTime,
     String endTime,
-    String tag,
+    List<String> tag,
     Boolean isOverNight,
     String state,
     String location,

@@ -14,7 +14,7 @@ public record EventResponseDto(
     Boolean isLongTimeEvent,
     LocalDateTime startTime,
     LocalDateTime endTime,
-    EventTag tag,
+    List<EventTag> tag,
     Boolean isOverNight,
     EventState state,
     String location,

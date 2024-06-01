@@ -60,8 +60,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventResponseDto> getEventListByTag(EventTag eventTag) {
-        if (eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(eventTag)) {
-            List<Event> eventList = eventRepository.findAllByTagAndIsDeletedFalseAndIsShowTrue(eventTag);
+        if (eventRepository.existsByTagContainsAndIsDeletedFalseAndIsShowTrue(eventTag)) {
+            List<Event> eventList = eventRepository.findAllByTagContainsAndIsDeletedFalseAndIsShowTrue(eventTag);
             return eventList.stream().map(eventMapper::eventToEventResponseDto).toList();
         } else {
             throw new EventException("해당하는 이벤트가 없습니다.");
