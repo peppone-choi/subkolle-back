@@ -5,6 +5,7 @@ import com.subkore.back.event.dto.EventResponseDto;
 import com.subkore.back.event.dto.UpdateEventRequestDto;
 import com.subkore.back.event.entity.Event;
 import com.subkore.back.event.enumerate.EventState;
+import com.subkore.back.event.enumerate.EventTag;
 import com.subkore.back.event.mapper.EventMapper;
 import com.subkore.back.event.repository.EventRepository;
 import com.subkore.back.event.service.EventService;
@@ -52,6 +53,16 @@ public class EventServiceImpl implements EventService {
         if (eventRepository.existsById(id)) {
             Event event = eventRepository.findById(id).get();
             return eventMapper.eventToEventResponseDto(event);
+        } else {
+            throw new EventException("해당하는 이벤트가 없습니다.");
+        }
+    }
+
+    @Override
+    public List<EventResponseDto> getEventListByTag(EventTag eventTag) {
+        if (eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(eventTag)) {
+            List<Event> eventList = eventRepository.findAllByTagAndIsDeletedFalseAndIsShowTrue(eventTag);
+            return eventList.stream().map(eventMapper::eventToEventResponseDto).toList();
         } else {
             throw new EventException("해당하는 이벤트가 없습니다.");
         }

@@ -4,6 +4,7 @@ import com.subkore.back.event.dto.CreateEventRequestDto;
 import com.subkore.back.event.dto.EventResponseDto;
 import com.subkore.back.event.dto.UpdateEventRequestDto;
 import com.subkore.back.event.enumerate.EventState;
+import com.subkore.back.event.enumerate.EventTag;
 import java.util.List;
 
 public interface EventService {
@@ -21,4 +22,6 @@ public interface EventService {
     EventResponseDto recoverEvent(Long id);
 
     EventResponseDto getEvent(Long id);
+
+    List<EventResponseDto> getEventListByTag(EventTag eventTag);
 }

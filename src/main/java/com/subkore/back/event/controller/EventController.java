@@ -4,6 +4,7 @@ import com.subkore.back.event.dto.CreateEventRequestDto;
 import com.subkore.back.event.dto.EventResponseDto;
 import com.subkore.back.event.dto.UpdateEventRequestDto;
 import com.subkore.back.event.enumerate.EventState;
+import com.subkore.back.event.enumerate.EventTag;
 import com.subkore.back.event.service.EventService;
 import java.net.URI;
 import java.util.List;
@@ -68,5 +69,11 @@ public class EventController {
     public ResponseEntity<EventResponseDto> recoverEvent(@PathVariable("id") Long id) {
         EventResponseDto result = eventService.recoverEvent(id);
         return ResponseEntity.created(URI.create("/api/v1/events/" + result.id())).body(result);
+    }
+
+    @GetMapping("/api/v1/events/tag/{tag}")
+    public ResponseEntity<List<EventResponseDto>> getEventListByTag(@PathVariable("tag") EventTag tag) {
+        List<EventResponseDto> result = eventService.getEventListByTag(tag);
+        return ResponseEntity.ok().body(result);
     }
 }

@@ -18,6 +18,7 @@ import com.subkore.back.event.dto.EventResponseDto;
 import com.subkore.back.event.dto.UpdateEventRequestDto;
 import com.subkore.back.event.entity.Event;
 import com.subkore.back.event.enumerate.EventState;
+import com.subkore.back.event.enumerate.EventTag;
 import com.subkore.back.event.mapper.EventMapper;
 import com.subkore.back.event.repository.EventRepository;
 import com.subkore.back.event.service.EventService;
@@ -323,5 +324,36 @@ class EventControllerTest {
         // then
         assertThrows(EventException.class,
             () -> eventService.getEvent(id));
+    }
+
+    @Test
+    @WithMockUser
+    void 이벤트를_태그별로_조회할_수_있다() throws Exception {
+        // given
+        List<Event> eventList = List.of(Event.builder()
+            .id(0L)
+            .title("test")
+                .tag(EventTag.EXHIBITION_AND_SALE)
+            .build());
+        List<EventResponseDto> eventResponseDto = eventList.stream()
+            .map(eventMapper::eventToEventResponseDto).toList();
+        // when
+        when(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).thenReturn(eventResponseDto);
+        // then
+        mockMvc.perform(get("/api/v1/events/tag/{tag}", EventTag.EXHIBITION_AND_SALE)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+            ).andDo(print())
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    void 이벤트_태그에_해당하는_이벤트가_없을_경우_예외를_반환한다() {
+        // given
+        when(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).thenThrow(new EventException("해당하는 이벤트가 없습니다."));
+        // then
+        assertThrows(EventException.class,
+            () -> eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE));
     }
 }

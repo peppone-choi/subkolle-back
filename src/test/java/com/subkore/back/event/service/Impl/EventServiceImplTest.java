@@ -561,4 +561,85 @@ class EventServiceImplTest {
         assertThrows(EventException.class,
             () -> eventService.getEvent(1L));
     }
+
+    @Test
+    void 태그에_따라_이벤트_리스트를_반환한다() {
+        // given
+        List<Event> eventList = List.of(Event.builder()
+                .id(1L)
+                .title("test")
+                .headerImage("test")
+                .isLongTimeEvent(false)
+                .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
+                .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
+                .tag(EventTag.EXHIBITION_AND_SALE)
+                .isOverNight(false)
+                .state(BEFORE_PROCEEDING)
+                .location("test")
+                .genreAndKeyword(List.of("test", "test2"))
+                .detail(EventDetail.builder()
+                    .price(List.of(
+                        Price.builder()
+                            .option("성인")
+                            .price(10000)
+                            .build(),
+                        Price.builder()
+                            .option("청소년")
+                            .price(5000)
+                            .build()))
+                    .link("test")
+                    .description("test")
+                    .build())
+                .build(),
+            Event.builder()
+                .id(2L)
+                .title("test2")
+                .headerImage("test2")
+                .isLongTimeEvent(true)
+                .startTime(LocalDateTime.parse("2021-01-04T00:00:00"))
+                .endTime(LocalDateTime.parse("2021-01-08T00:00:00"))
+                .tag(EventTag.EXHIBITION_AND_SALE)
+                .isOverNight(false)
+                .state(BEFORE_PROCEEDING)
+                .location("test")
+                .genreAndKeyword(List.of("test", "test2"))
+                .detail(EventDetail.builder()
+                    .price(List.of(
+                        Price.builder()
+                            .option("성인")
+                            .price(10000)
+                            .build(),
+                        Price.builder()
+                            .option("청소년")
+                            .price(5000)
+                            .build()))
+                    .link("test")
+                    .description("test")
+                    .build())
+                .build());
+        when(eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(
+            EventTag.EXHIBITION_AND_SALE)).thenReturn(true);
+        when(eventRepository.findAllByTagAndIsDeletedFalseAndIsShowTrue(
+            EventTag.EXHIBITION_AND_SALE)).thenReturn(
+            eventList);
+
+        // when
+        List<EventResponseDto> responseList =
+            eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE);
+
+        // then
+        assertEquals(responseList.size(), 2);
+        assertEquals(responseList.get(0).id(), 1L);
+        assertEquals(responseList.get(1).tag(), EventTag.EXHIBITION_AND_SALE);
+    }
+
+    @Test
+    void 태그에_따른_이벤트가_없다면_예외를_반환한다() {
+        // given
+        when(eventRepository.existsByTagAndIsDeletedFalseAndIsShowTrue(
+            EventTag.EXHIBITION_AND_SALE)).thenReturn(false);
+        // when + then
+        assertThrows(EventException.class,
+            () -> eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE));
+    }
 }
