@@ -35,7 +35,7 @@ class EventRepositoryTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(EventState.WILL_UPDATE)
             .location("test")

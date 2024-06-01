@@ -48,7 +48,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(false)
                 .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-                .tag(EventTag.ETC)
+                .tag(List.of(EventTag.ETC))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -74,7 +74,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(true)
                 .startTime(LocalDateTime.parse("2021-01-04T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-08T00:00:00"))
-                .tag(EventTag.ETC)
+                .tag(List.of(EventTag.ETC))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -126,7 +126,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(false)
                 .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-                .tag(EventTag.ETC)
+                .tag(List.of(EventTag.ETC))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -152,7 +152,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(true)
                 .startTime(LocalDateTime.parse("2021-01-04T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-08T00:00:00"))
-                .tag(EventTag.ETC)
+                .tag(List.of(EventTag.ETC))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -199,7 +199,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -225,7 +225,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime("2021-01-01T00:00:00")
             .endTime("2021-01-02T00:00:00")
-            .tag("ETC")
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state("WILL_UPDATE")
             .location("test")
@@ -259,7 +259,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime("2021-01-01T00:00:00")
             .endTime("2021-01-02T00:00:00")
-            .tag("ETC")
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state("test")
             .location("test")
@@ -293,7 +293,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(new ArrayList<>(List.of(EventTag.ETC)))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -319,7 +319,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime("2021-01-01T00:00:00")
             .endTime("2021-01-02T00:00:00")
-            .tag("EXHIBITION_AND_SALE")
+            .tag(List.of("EXHIBITION_AND_SALE"))
             .isOverNight(false)
             .state("WILL_UPDATE")
             .location("test")
@@ -346,7 +346,7 @@ class EventServiceImplTest {
         // when
         EventResponseDto response = eventService.updateEvent(1L, updateEventRequestDto);
         // then
-        assertEquals(response.tag(), EventTag.EXHIBITION_AND_SALE);
+        assertEquals(response.tag(), List.of(EventTag.EXHIBITION_AND_SALE));
         assertEquals(response.genreAndKeyword(), Arrays.asList("test", "test2", "test3"));
     }
 
@@ -359,7 +359,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime("2021-01-01T00:00:00")
             .endTime("2021-01-02T00:00:00")
-            .tag("EXHIBITION_AND_SALE")
+            .tag(List.of("EXHIBITION_AND_SALE"))
             .isOverNight(false)
             .state("WILL_UPDATE")
             .location("test")
@@ -392,7 +392,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -438,7 +438,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -486,7 +486,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -524,7 +524,7 @@ class EventServiceImplTest {
             .isLongTimeEvent(false)
             .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
             .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-            .tag(EventTag.ETC)
+            .tag(List.of(EventTag.ETC))
             .isOverNight(false)
             .state(WILL_UPDATE)
             .location("test")
@@ -572,7 +572,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(false)
                 .startTime(LocalDateTime.parse("2021-01-01T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-02T00:00:00"))
-                .tag(EventTag.EXHIBITION_AND_SALE)
+                .tag(List.of(EventTag.EXHIBITION_AND_SALE))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -598,7 +598,7 @@ class EventServiceImplTest {
                 .isLongTimeEvent(true)
                 .startTime(LocalDateTime.parse("2021-01-04T00:00:00"))
                 .endTime(LocalDateTime.parse("2021-01-08T00:00:00"))
-                .tag(EventTag.EXHIBITION_AND_SALE)
+                .tag(List.of(EventTag.EXHIBITION_AND_SALE))
                 .isOverNight(false)
                 .state(BEFORE_PROCEEDING)
                 .location("test")
@@ -630,7 +630,7 @@ class EventServiceImplTest {
         // then
         assertEquals(responseList.size(), 2);
         assertEquals(responseList.get(0).id(), 1L);
-        assertEquals(responseList.get(1).tag(), EventTag.EXHIBITION_AND_SALE);
+        assertEquals(responseList.get(1).tag(), List.of(EventTag.EXHIBITION_AND_SALE));
     }
 
     @Test

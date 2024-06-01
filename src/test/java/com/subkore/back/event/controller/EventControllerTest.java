@@ -333,7 +333,7 @@ class EventControllerTest {
         List<Event> eventList = List.of(Event.builder()
             .id(0L)
             .title("test")
-                .tag(EventTag.EXHIBITION_AND_SALE)
+                .tag(List.of(EventTag.EXHIBITION_AND_SALE))
             .build());
         List<EventResponseDto> eventResponseDto = eventList.stream()
             .map(eventMapper::eventToEventResponseDto).toList();
