@@ -44,7 +44,7 @@ class MenuControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private MenuController menuController;
-    private MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class).INSTANCE;
+    private final MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class).INSTANCE;
 
     @Test
     @WithMockUser(username = "테스트")
