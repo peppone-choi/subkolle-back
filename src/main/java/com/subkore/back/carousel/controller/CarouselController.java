@@ -51,6 +51,6 @@ public class CarouselController {
     @PutMapping("/api/v1/carousels/{id}/recover")
     public ResponseEntity<Void> recoverCarousel(@PathVariable("id") Long id) {
         carouselService.recoverCarousel(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.created(URI.create("/carousels/" + id)).build();
     }
 }

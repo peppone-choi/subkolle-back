@@ -1,7 +1,9 @@
 package com.subkore.back.event.controller;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -9,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,11 +45,6 @@ class EventControllerTest {
     private EventService eventService;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private EventController eventController;
-    @MockBean
-    private EventRepository eventRepository;
-    private EventMapper eventMapper = Mappers.getMapper(EventMapper.class).INSTANCE;
 
     @Test
     @WithMockUser
@@ -58,10 +56,14 @@ class EventControllerTest {
             .state(EventState.WILL_UPDATE)
             .build());
         List<EventState> state = List.of(EventState.WILL_UPDATE);
-        List<EventResponseDto> eventResponseDto = eventList.stream()
-            .map(eventMapper::eventToEventResponseDto).toList();
+        given(eventService.getEventListByStateContains(state)).willReturn(eventList.stream()
+            .map(event -> EventResponseDto.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .state(event.getState())
+                .build())
+            .toList());
         // when
-        when(eventService.getEventListByStateContains(state)).thenReturn(eventResponseDto);
 
         // then
         mockMvc.perform(get("/api/v1/events")
@@ -69,7 +71,11 @@ class EventControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("state", "WILL_UPDATE")
             ).andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].title").value("test"))
+            .andExpect(jsonPath("$[0].state").value("WILL_UPDATE"))
+            .andExpect(jsonPath("$[0].id").value(0));
+
 
     }
 
@@ -78,9 +84,8 @@ class EventControllerTest {
     void 해당_상태의_이벤트_리스트가_없을_경우_예외가_발생한다() throws Exception {
         // given
         List<EventState> state = List.of(EventState.WILL_UPDATE);
+        given(eventService.getEventListByStateContains(state)).willThrow(new EventException("해당하는 이벤트가 없습니다."));
         // when
-        when(eventService.getEventListByStateContains(state)).thenThrow(new EventException("이벤트 "
-            + "리스트가 존재하지 않습니다. 상태를 확인해 주십시오."));
         // then
         mockMvc.perform(get("/api/v1/events")
                 .with(csrf())
@@ -99,24 +104,31 @@ class EventControllerTest {
             .title("test")
             .state(EventState.WILL_UPDATE)
             .build());
-        List<EventResponseDto> eventResponseDto = eventList.stream()
-            .map(eventMapper::eventToEventResponseDto).toList();
+        given(eventService.getEventListAll()).willReturn(eventList.stream()
+            .map(event -> EventResponseDto.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .state(event.getState())
+                .build())
+            .toList());
         // when
-        when(eventService.getEventListAll()).thenReturn(eventResponseDto);
         // then
         mockMvc.perform(get("/api/v1/events/all")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
             ).andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].title").value("test"))
+            .andExpect(jsonPath("$[0].state").value("WILL_UPDATE"))
+            .andExpect(jsonPath("$[0].id").value(0));
     }
 
     @Test
     @WithMockUser
     void 모든_이벤트_리스트가_없을_경우_예외가_발생한다() throws Exception {
         // given
+        given(eventService.getEventListAll()).willThrow(new EventException("해당하는 이벤트가 없습니다."));
         // when
-        when(eventService.getEventListAll()).thenThrow(new EventException("이벤트 리스트가 존재하지 않습니다."));
         // then
         mockMvc.perform(get("/api/v1/events/all")
                 .with(csrf())
@@ -133,14 +145,15 @@ class EventControllerTest {
             .title("test")
             .state("WILL_UPDATE")
             .build();
-        Event event = Event.builder()
-            .id(0L)
-            .title("test")
-            .state(EventState.WILL_UPDATE)
-            .build();
-        EventResponseDto eventResponseDto = eventMapper.eventToEventResponseDto(event);
+        given(eventService.createEvent(new ObjectMapper().registerModule(new JavaTimeModule())
+            .readValue(new ObjectMapper().registerModule(new JavaTimeModule())
+                .writeValueAsString(createEventRequestDto), CreateEventRequestDto.class)))
+            .willReturn(EventResponseDto.builder()
+                .title(createEventRequestDto.title())
+                .state(EventState.WILL_UPDATE)
+                .build());
         // when
-        when(eventService.createEvent(createEventRequestDto)).thenReturn(eventResponseDto);
+
         // then
         mockMvc.perform(post("/api/v1/events")
                 .with(csrf())
@@ -148,7 +161,9 @@ class EventControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(createEventRequestDto)))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.title").value("test"))
+            .andExpect(jsonPath("$.state").value("WILL_UPDATE"));
     }
 
     @Test
@@ -165,13 +180,11 @@ class EventControllerTest {
             .title("test")
             .state("PROCEEDING")
             .build();
-        eventMapper.updateEventFromDto(updateEventRequestDto, event);
-        EventResponseDto eventResponseDto = eventMapper.eventToEventResponseDto(event);
+        given(eventService.updateEvent(id, updateEventRequestDto)).willReturn(EventResponseDto.builder()
+            .title(updateEventRequestDto.title())
+            .state(EventState.PROCEEDING)
+            .build());
         // when
-        when(eventService.updateEvent(id, new ObjectMapper().registerModule(new JavaTimeModule())
-            .readValue(new ObjectMapper().registerModule(new JavaTimeModule())
-                .writeValueAsString(updateEventRequestDto), UpdateEventRequestDto.class)))
-            .thenReturn(eventResponseDto);
         // then
         mockMvc.perform(put("/api/v1/events/{id}", id)
                 .with(csrf())
@@ -179,7 +192,9 @@ class EventControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(updateEventRequestDto)))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.title").value("test"))
+            .andExpect(jsonPath("$.state").value("PROCEEDING"));
     }
 
     @Test
@@ -191,9 +206,8 @@ class EventControllerTest {
             .title("test")
             .state("PROCEEDING")
             .build();
+        given(eventService.updateEvent(id, updateEventRequestDto)).willThrow(new EventException("해당하는 이벤트가 없습니다."));
         // when
-        when(eventRepository.findById(id)).thenReturn(java.util.Optional.empty());
-        when(eventService.updateEvent(id, updateEventRequestDto)).thenThrow(new EventException("해당하는 이벤트가 없습니다."));
         // then
         mockMvc.perform(put("/api/v1/events/{id}", id)
                 .with(csrf())
@@ -209,8 +223,8 @@ class EventControllerTest {
     void 이벤트_삭제가_가능하다() throws Exception {
         // given
         Long id = 0L;
-        // when
         doNothing().when(eventService).deleteEvent(id);
+        // when
         // then
         mockMvc.perform(delete("/api/v1/events/{id}", id)
                 .with(csrf())
@@ -224,8 +238,8 @@ class EventControllerTest {
     void 이벤트_삭제_시_해당_이벤트가_존재하지_않을_경우_예외가_발생한다() throws Exception {
         // given
         Long id = 0L;
+        doThrow(new EventException("해당하는 이벤트가 없습니다.")).when(eventService).deleteEvent(id);
         // when
-        when(eventController.deleteEvent(id)).thenThrow(new EventException("해당하는 이벤트가 없습니다."));
         // then
         mockMvc.perform(delete("/api/v1/events/{id}", id)
                 .with(csrf())
@@ -239,8 +253,8 @@ class EventControllerTest {
     void 이벤트_삭제_시_이미_삭제되어있는_이벤트를_다시_삭제할_수_없다() throws Exception {
         // given
         Long id = 0L;
+        doThrow(new EventException("이미 삭제된 이벤트입니다.")).when(eventService).deleteEvent(id);
         // when
-        when(eventController.deleteEvent(id)).thenThrow(new EventException("이미 삭제된 이벤트입니다."));
         // then
         mockMvc.perform(delete("/api/v1/events/{id}", id)
                 .with(csrf())
@@ -260,16 +274,21 @@ class EventControllerTest {
             .state(EventState.WILL_UPDATE)
             .isDeleted(true)
             .build();
-        event.recover();
-        EventResponseDto eventResponseDto = eventMapper.eventToEventResponseDto(event);
+        given(eventService.recoverEvent(id)).willReturn(EventResponseDto.builder()
+            .title("test")
+            .state(EventState.WILL_UPDATE)
+            .isDeleted(false)
+            .build());
         // when
-        when(eventService.recoverEvent(id)).thenReturn(eventResponseDto);
         // then
         mockMvc.perform(put("/api/v1/events/{id}/recover", id)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
             ).andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.title").value("test"))
+            .andExpect(jsonPath("$.state").value("WILL_UPDATE"))
+            .andExpect(jsonPath("$.isDeleted").value(false));
     }
     @Test
     @WithMockUser
@@ -282,9 +301,8 @@ class EventControllerTest {
             .state(EventState.WILL_UPDATE)
             .isDeleted(false)
             .build();
+        given(eventService.recoverEvent(id)).willThrow(new EventException("이미 삭제되지 않은 이벤트입니다."));
         // when
-        when(eventRepository.findById(id)).thenReturn(java.util.Optional.of(event));
-        when(eventService.recoverEvent(id)).thenThrow(new EventException("이미 삭제되지 않은 이벤트입니다."));
 
         // then
         mockMvc.perform(put("/api/v1/events/{id}/recover", id)
@@ -304,26 +322,30 @@ class EventControllerTest {
             .title("test")
             .state(EventState.WILL_UPDATE)
             .build();
-        EventResponseDto eventResponseDto = eventMapper.eventToEventResponseDto(event);
+        given(eventService.getEvent(id)).willReturn(EventResponseDto.builder().id(0L).title("test")
+            .state(EventState.WILL_UPDATE).build());
         // when
-        when(eventService.getEvent(id)).thenReturn(eventResponseDto);
         // then
         mockMvc.perform(get("/api/v1/events/{id}", id)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
             ).andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("test"));
     }
 
     @Test
     @WithMockUser
-    void 이벤트의_정보를_확인할_때_이벤트가_없으면_오류를_반환한다() {
+    void 이벤트의_정보를_확인할_때_이벤트가_없으면_오류를_반환한다() throws Exception {
         // given
         Long id = 0L;
-        when(eventService.getEvent(id)).thenThrow(new EventException("해당하는 이벤트가 없습니다."));
+        given(eventService.getEvent(id)).willThrow(new EventException("해당하는 이벤트가 없습니다."));
         // then
-        assertThrows(EventException.class,
-            () -> eventService.getEvent(id));
+        mockMvc.perform(get("/api/v1/events/{id}", id)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+            ).andDo(print())
+            .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -335,25 +357,33 @@ class EventControllerTest {
             .title("test")
                 .tag(List.of(EventTag.EXHIBITION_AND_SALE))
             .build());
-        List<EventResponseDto> eventResponseDto = eventList.stream()
-            .map(eventMapper::eventToEventResponseDto).toList();
+        given(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).willReturn(eventList.stream()
+            .map(event -> EventResponseDto.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .tag(event.getTag())
+                .build())
+            .toList());
         // when
-        when(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).thenReturn(eventResponseDto);
         // then
         mockMvc.perform(get("/api/v1/events/tag/{tag}", EventTag.EXHIBITION_AND_SALE)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
             ).andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].title").value("test"));
     }
 
     @Test
     @WithMockUser
-    void 이벤트_태그에_해당하는_이벤트가_없을_경우_예외를_반환한다() {
+    void 이벤트_태그에_해당하는_이벤트가_없을_경우_예외를_반환한다() throws Exception {
         // given
-        when(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).thenThrow(new EventException("해당하는 이벤트가 없습니다."));
+        given(eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE)).willThrow(new EventException("해당하는 이벤트가 없습니다."));
         // then
-        assertThrows(EventException.class,
-            () -> eventService.getEventListByTag(EventTag.EXHIBITION_AND_SALE));
+        mockMvc.perform(get("/api/v1/events/tag/{tag}", EventTag.EXHIBITION_AND_SALE)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+            ).andDo(print())
+            .andExpect(status().is4xxClientError());
     }
 }

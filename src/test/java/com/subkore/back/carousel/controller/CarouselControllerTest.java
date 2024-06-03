@@ -1,7 +1,9 @@
 package com.subkore.back.carousel.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -36,13 +38,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureWebMvc
 class CarouselControllerTest {
 
-    private final CarouselMapper carouselMapper = Mappers.getMapper(CarouselMapper.class).INSTANCE;
     @MockBean
     private CarouselService carouselService;
-    @MockBean
-    private CarouselRepository carouselRepository;
-    @Autowired
-    private CarouselController carouselController;
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,13 +54,16 @@ class CarouselControllerTest {
             .description("test")
             .linkTo("test")
             .build();
-        when(carouselService.getCarouselList()).thenReturn(List.of(carouselResponseDto));
+        given(carouselService.getCarouselList()).willReturn(List.of(carouselResponseDto));
         // when
         mockMvc.perform(get("/api/v1/carousels")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(),
+                new ObjectMapper().registerModule(new JavaTimeModule())
+                    .writeValueAsString(List.of(carouselResponseDto))));
     }
 
     @Test
@@ -75,11 +75,14 @@ class CarouselControllerTest {
             .description("test")
             .linkTo("test")
             .build();
-        CarouselResponseDto carouselResponseDto =
-            carouselMapper.carouselToCarouselResponseDto(
-                carouselMapper.createCarouselRequestDtoToCarousel(createCarouselRequestDto));
-        when(carouselService.createCarousel(createCarouselRequestDto)).thenReturn(
-            carouselResponseDto);
+        given(carouselService.createCarousel(createCarouselRequestDto)).willReturn(
+            CarouselResponseDto.builder()
+                .id(0L)
+                .order(0)
+                .title("test")
+                .description("test")
+                .linkTo("test")
+                .build());
         // when
         mockMvc.perform(post("/api/v1/carousels")
                 .with(csrf())
@@ -87,20 +90,29 @@ class CarouselControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(createCarouselRequestDto)))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(),
+                new ObjectMapper().registerModule(new JavaTimeModule())
+                    .writeValueAsString(CarouselResponseDto.builder()
+                        .id(0L)
+                        .order(0)
+                        .title("test")
+                        .description("test")
+                        .linkTo("test")
+                        .build())));
     }
 
     @Test
     @WithMockUser(username = "테스트")
     void 캐러셀이_없을_경우_예외가_발생한다() throws Exception {
         // given
-        when(carouselService.getCarouselList()).thenThrow(
-            new CarouselException("캐러셀 아이템이 존재하지 않습니다."));
+        given(carouselService.getCarouselList()).willThrow(new CarouselException("캐러셀이 없습니다."));
         // when
         mockMvc.perform(get("/api/v1/carousels")
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "캐러셀이 없습니다."));
         // then
     }
     @Test
@@ -108,6 +120,8 @@ class CarouselControllerTest {
     void 캐러셀_등록_시_항목이_없을_경우_예외가_던져진다() throws Exception {
         // given
         CreateCarouselRequestDto createCarouselRequestDto = CreateCarouselRequestDto.builder().build();
+        given(carouselService.createCarousel(createCarouselRequestDto)).willThrow(new CarouselException("필수 항목이 "
+            + "없습니다."));
         // when
         // then
         mockMvc.perform(post("/api/v1/carousels")
@@ -116,7 +130,8 @@ class CarouselControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(createCarouselRequestDto)))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "필수 항목이 없습니다."));
     }
 
     @Test
@@ -137,9 +152,14 @@ class CarouselControllerTest {
             .linkTo("test2")
             .imageUrl("test2")
             .build();
-        carouselMapper.updateCarouselRequestDtoToCarousel(carouselRequestDto, carousel);
-        when(carouselService.updateCarousel(0L, carouselRequestDto)).thenReturn(
-            carouselMapper.carouselToCarouselResponseDto(carousel));
+        given(carouselService.updateCarousel(0L, carouselRequestDto)).willReturn(
+            CarouselResponseDto.builder()
+                .id(0L)
+                .order(0)
+                .title("test2")
+                .description("test2")
+                .linkTo("test2")
+                .build());
         // when
         mockMvc.perform(put("/api/v1/carousels/0")
                 .with(csrf())
@@ -147,7 +167,16 @@ class CarouselControllerTest {
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(carouselRequestDto)))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(),
+                new ObjectMapper().registerModule(new JavaTimeModule())
+                    .writeValueAsString(CarouselResponseDto.builder()
+                        .id(0L)
+                        .order(0)
+                        .title("test2")
+                        .description("test2")
+                        .linkTo("test2")
+                        .build())));
         // then
     }
 
@@ -163,8 +192,8 @@ class CarouselControllerTest {
             .linkTo("test")
             .isDeleted(false)
             .build();
-        // when
         doNothing().when(carouselService).deleteCarousel(0L);
+        // when
 
         // then
         mockMvc.perform(delete("/api/v1/carousels/0")
@@ -178,30 +207,31 @@ class CarouselControllerTest {
     @WithMockUser(username = "테스트")
     void 캐러셀이_존재하지_않는_경우_삭제가_불가능하고_예외가_발생한다() throws Exception {
         // given
+        doThrow(new CarouselException("존재하지 않는 캐러셀 아이템입니다.")).when(carouselService).deleteCarousel(0L);
         // when
-        when(carouselController.deleteCarousel(0L)).thenThrow(new CarouselException("존재하지 않는 캐러셀 "
-            + "아이템입니다."));
         // then
         mockMvc.perform(delete("/api/v1/carousels/0")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "존재하지 않는 캐러셀 "
+                + "아이템입니다."));
     }
 
     @Test
     @WithMockUser(username = "테스트")
     void 이미_삭제된_캐러셀을_삭제할_시_예외가_발생한다() throws Exception {
         // given
-        when(carouselController.deleteCarousel(0L)).thenThrow(new CarouselException("이미 삭제된 캐러셀 "
-            + "아이템입니다."));
+        doThrow(new CarouselException("이미 삭제된 캐러셀입니다.")).when(carouselService).deleteCarousel(0L);
         // when
         // then
         mockMvc.perform(delete("/api/v1/carousels/0")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "이미 삭제된 캐러셀입니다."));
     }
 
     @Test
@@ -216,8 +246,7 @@ class CarouselControllerTest {
             .linkTo("test")
             .isDeleted(true)
             .build();
-        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
-        when(carouselRepository.existsById(0L)).thenReturn(true);
+        doNothing().when(carouselService).recoverCarousel(0L);
 
         // when
 
@@ -226,24 +255,25 @@ class CarouselControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().isNoContent());
+            .andExpect(status().isCreated())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), ""));
     }
 
     @Test
     @WithMockUser(username = "테스트")
     void 캐러셀이_존재하지_않는_경우_복구가_불가능하고_예외가_발생한다() throws Exception {
         // given
+        doThrow(new CarouselException("존재하지 않는 캐러셀 아이템입니다.")).when(carouselService).recoverCarousel(0L);
         // when
-        when(carouselRepository.existsById(0L)).thenReturn(false);
-        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.empty());
-        when(carouselController.recoverCarousel(0L)).thenThrow(new CarouselException("존재하지 않는 캐러셀 "
-            + "아이템입니다."));
+
         // then
         mockMvc.perform(put("/api/v1/carousels/0/recover")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "존재하지 않는 캐러셀 "
+                + "아이템입니다."));
     }
 
     @Test
@@ -258,14 +288,14 @@ void 이미_복구된_캐러셀을_복구할_시_예외가_발생한다() throws
             .linkTo("test")
             .isDeleted(false)
             .build();
-        when(carouselRepository.findById(0L)).thenReturn(java.util.Optional.of(carousel));
-        when(carouselRepository.existsById(0L)).thenReturn(true);
+        doThrow(new CarouselException("이미 복구된 캐러셀입니다.")).when(carouselService).recoverCarousel(0L);
         // when
         // then
-        mockMvc.perform(put("/api/v1/carousels/0/recover/")
+        mockMvc.perform(put("/api/v1/carousels/0/recover")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().is4xxClientError());
+            .andExpect(status().is4xxClientError())
+            .andExpect(result -> assertEquals(result.getResponse().getContentAsString(), "이미 복구된 캐러셀입니다."));
     }
 }

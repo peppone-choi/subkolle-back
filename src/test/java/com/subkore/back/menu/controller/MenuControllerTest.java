@@ -1,6 +1,8 @@
 package com.subkore.back.menu.controller;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -8,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,13 +41,9 @@ class MenuControllerTest {
 
     @MockBean
     private MenuService menuService;
-    @MockBean
-    private MenuRepository menuRepository;
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private MenuController menuController;
-    private final MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class).INSTANCE;
+
 
     @Test
     @WithMockUser(username = "테스트")
@@ -54,17 +53,23 @@ class MenuControllerTest {
             .icon("test")
             .text("test")
             .linkTo("/").build();
-        MenuResponseDto menuResponseDto = menuMapper.menuToMenuResponseDto(
-            menuMapper.createMenuRequestDtoToMenu(createMenuRequestDto));
-        when(menuService.createMenu(createMenuRequestDto)).thenReturn(menuResponseDto);
+        given(menuService.createMenu(createMenuRequestDto)).willReturn(MenuResponseDto.builder()
+            .iconType(createMenuRequestDto.iconType())
+            .icon(createMenuRequestDto.icon())
+            .text(createMenuRequestDto.text())
+            .linkTo(createMenuRequestDto.linkTo())
+            .build());
         mockMvc.perform(post("/api/v1/menus")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
                     .writeValueAsString(createMenuRequestDto)))
             .andDo(print())
-            .andExpect(status().isCreated());
-
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.iconType").value(createMenuRequestDto.iconType()))
+            .andExpect(jsonPath("$.icon").value(createMenuRequestDto.icon()))
+            .andExpect(jsonPath("$.text").value(createMenuRequestDto.text()))
+            .andExpect(jsonPath("$.linkTo").value(createMenuRequestDto.linkTo()));
     }
 
     @Test
@@ -85,18 +90,43 @@ class MenuControllerTest {
                 .linkTo("test2")
                 .build());
 
-        List<MenuResponseDto> dtoList = menuList.stream()
-            .map(menu -> menuMapper.menuToMenuResponseDto(menu)).toList();
-        when(menuService.getMenuList()).thenReturn(dtoList);
+        given(menuService.getMenuList()).willReturn(List.of(
+            MenuResponseDto.builder()
+                .id(0L)
+                .menuOrder(0)
+                .icon("test")
+                .text("test")
+                .linkTo("test")
+                .build(),
+            MenuResponseDto.builder()
+                .id(1L)
+                .menuOrder(1)
+                .icon("test2")
+                .text("test2")
+                .linkTo("test2")
+                .build()
+        ));
+
         mockMvc.perform(get("/api/v1/menus")
                 .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print()).andExpect(status().isOk());
+            .andDo(print()).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(0L))
+            .andExpect(jsonPath("$[0].menuOrder").value(0))
+            .andExpect(jsonPath("$[0].icon").value("test"))
+            .andExpect(jsonPath("$[0].text").value("test"))
+            .andExpect(jsonPath("$[0].linkTo").value("test"))
+            .andExpect(jsonPath("$[1].id").value(1L))
+            .andExpect(jsonPath("$[1].menuOrder").value(1))
+            .andExpect(jsonPath("$[1].icon").value("test2"))
+            .andExpect(jsonPath("$[1].text").value("test2"))
+            .andExpect(jsonPath("$[1].linkTo").value("test2"));
+
     }
 
     @Test
     @WithMockUser
     void 메뉴가_없을_경우_예외가_발생한다() throws Exception {
-        when(menuService.getMenuList()).thenThrow(new MenuException("메뉴가 없습니다."));
+        given(menuService.getMenuList()).willThrow(new MenuException("메뉴가 없습니다."));
         mockMvc.perform(get("/api/v1/menus")
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -106,12 +136,12 @@ class MenuControllerTest {
     @Test
     @WithMockUser
     void 메뉴_등록_시_항목이_없을_경우_예외가_던져진다() throws Exception {
-        CreateMenuRequestDto createMenuRequestDto = CreateMenuRequestDto.builder().build();
+        given(menuService.createMenu(null)).willThrow(new MenuException("메뉴의 항목은 null 일 수 없습니다."));
         mockMvc.perform(post("/api/v1/menus")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().registerModule(new JavaTimeModule())
-                    .writeValueAsString(createMenuRequestDto)))
+                    .writeValueAsString(null)))
             .andDo(print())
             .andExpect(status().is4xxClientError());
     }
@@ -136,8 +166,7 @@ class MenuControllerTest {
         // given
         Long id = 1L;
         // when
-        doNothing().when(menuService).deleteMenu(id);
-        when(menuController.deleteMenu(id)).thenThrow(new MenuException("존재하지 않는 메뉴입니다."));
+        doThrow(new MenuException("존재하지 않는 메뉴입니다.")).when(menuService).deleteMenu(id);
 
         // then
         mockMvc.perform(delete("/api/v1/menus/{id}", id)
@@ -153,9 +182,7 @@ class MenuControllerTest {
         // given
         Long id = 1L;
         // when
-        doNothing().when(menuService).deleteMenu(id);
-        when(menuController.deleteMenu(id)).thenThrow(new MenuException("이미 삭제된 메뉴입니다."));
-
+        doThrow(new MenuException("존재하지 않는 메뉴입니다.")).when(menuService).deleteMenu(id);
         // then
         mockMvc.perform(delete("/api/v1/menus/{id}", id)
                 .with(csrf())
@@ -171,7 +198,13 @@ class MenuControllerTest {
         Long id = 1L;
         // when
 
-        when(menuService.recoverMenu(id)).thenReturn(menuMapper.menuToMenuResponseDto(Menu.builder().id(id).isDeleted(false).build()));
+        given(menuService.recoverMenu(id)).willReturn(MenuResponseDto.builder()
+            .id(id)
+            .menuOrder(0)
+            .icon("test")
+            .text("test")
+            .linkTo("test")
+            .build());
         // then
         mockMvc.perform(put("/api/v1/menus/{id}/recover", id)
                 .with(csrf())
@@ -186,10 +219,8 @@ class MenuControllerTest {
         // given
         Long id = 1L;
         Menu menu = Menu.builder().id(id).isDeleted(false).build();
-        when(menuRepository.existsById(id)).thenReturn(true);
-        when(menuRepository.findById(id)).thenReturn(java.util.Optional.of(menu));
+        given(menuService.recoverMenu(id)).willThrow(new MenuException("삭제 되지 않은 메뉴입니다."));
         // when
-        when(menuService.recoverMenu(id)).thenThrow(new MenuException("삭제 되지 않은 메뉴입니다."));
         // then
         mockMvc.perform(put("/api/v1/menus/{id}/recover", id)
                 .with(csrf())
