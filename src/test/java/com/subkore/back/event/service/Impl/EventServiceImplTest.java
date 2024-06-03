@@ -28,8 +28,10 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
+@Transactional
 class EventServiceImplTest {
 
     private final EventMapper eventMapper = Mappers.getMapper(EventMapper.class).INSTANCE;
