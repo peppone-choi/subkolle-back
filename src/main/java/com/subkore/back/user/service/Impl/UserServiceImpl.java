@@ -20,11 +20,38 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(CreateUserRequestDto createUserRequestDto) {
-        if (userRepository.existsUserByEmail(createUserRequestDto.email())) {
+        if (userRepository.existsUserByEmailAndIsDeletedFalse(createUserRequestDto.email())) {
             throw new UserException("이미 등록된 이메일입니다.");
         }
         User user = userMapper.createUserRequestDtoToUser(createUserRequestDto);
         User savedUser = userRepository.save(user);
         return userMapper.userToUserResponseDto(savedUser);
+    }
+
+    @Override
+    public UserResponseDto getUserByEmail(String email) {
+        if (!userRepository.existsUserByEmailAndIsDeletedFalse(email)) {
+            throw new UserException("등록되지 않은 이메일입니다.");
+        }
+        User user = userRepository.findByEmailAndIsDeletedFalse(email);
+        return userMapper.userToUserResponseDto(user);
+    }
+
+    @Override
+    public UserResponseDto getUserByUserUUID(String userUUID) {
+        if (!userRepository.existsUserByUserUUIDAndIsDeletedFalse(userUUID)) {
+            throw new UserException("등록되지 않은 유저입니다.");
+        }
+        User user = userRepository.findByUserUUIDAndIsDeletedFalse(userUUID);
+        return userMapper.userToUserResponseDto(user);
+    }
+
+    @Override
+    public UserResponseDto getUserByNickname(String nickname) {
+        if (!userRepository.existsUserByNicknameAndIsDeletedFalse(nickname)) {
+            throw new UserException("등록되지 않은 닉네임입니다.");
+        }
+        User user = userRepository.findByNicknameAndIsDeletedFalse(nickname);
+        return userMapper.userToUserResponseDto(user);
     }
 }

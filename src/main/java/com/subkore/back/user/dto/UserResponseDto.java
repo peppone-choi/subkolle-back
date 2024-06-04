@@ -8,7 +8,6 @@ public record UserResponseDto(
     String userUUID,
     String email,
     String nickname,
-    String password,
     String profileImage,
     String role
 ) {

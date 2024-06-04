@@ -3,6 +3,7 @@ package com.subkore.back.user.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.subkore.back.exception.UserException;
@@ -51,7 +52,6 @@ public class UserServiceTest {
         // then
         assertEquals(responseDto.email(), "test@test.com");
         assertEquals(responseDto.nickname(), "test");
-        assertEquals(responseDto.password(), "test");
         assertEquals(responseDto.profileImage(), "test");
         assertEquals(responseDto.role(), "test");
     }
@@ -64,8 +64,92 @@ public class UserServiceTest {
             .nickname("test")
             .profileImage("test")
             .role("test").build();
-        when(userRepository.existsUserByEmail(createUserRequestDto.email())).thenReturn(true);
+        when(userRepository.existsUserByEmailAndIsDeletedFalse(createUserRequestDto.email())).thenReturn(true);
         // then
         assertThrows(UserException.class, () -> userServiceImpl.createUser(createUserRequestDto));
+    }
+
+    @Test
+    void 유저_이메일로_유저를_찾을_수_있다() {
+        // given
+        String email = "test@test.com";
+        User user = User.builder()
+            .email(email)
+            .password("test")
+            .nickname("test")
+            .profileImage("test")
+            .role("test")
+            .isDeleted(false)
+            .build();
+        when(userRepository.existsUserByEmailAndIsDeletedFalse(email)).thenReturn(true);
+        when(userRepository.findByEmailAndIsDeletedFalse(email)).thenReturn(user);
+        // when
+        UserResponseDto responseDto = userServiceImpl.getUserByEmail(email);
+        // then
+        assertEquals(responseDto.email(), email);
+        assertEquals(responseDto.nickname(), "test");
+        assertEquals(responseDto.profileImage(), "test");
+    }
+
+    @Test
+    void 만약_등록되지_않거나_삭제된_유저라면_예외가_반환된다() {
+        // given
+        String email = "test@test.com";
+        given(userRepository.existsUserByEmailAndIsDeletedFalse(email)).willReturn(false);
+        // then
+        assertThrows(UserException.class, () -> userServiceImpl.getUserByEmail(email));
+    }
+
+    @Test
+    void 유저_UUID로_유저를_찾을_수_있다() {
+        // given
+        String userUUID = "test";
+        User user = User.builder()
+            .userUUID(userUUID)
+            .email("test@test.com")
+            .build();
+        given(userRepository.existsUserByUserUUIDAndIsDeletedFalse(userUUID)).willReturn(true);
+        given(userRepository.findByUserUUIDAndIsDeletedFalse(userUUID)).willReturn(user);
+        // when
+        UserResponseDto responseDto = userServiceImpl.getUserByUserUUID(userUUID);
+        // then
+        assertEquals(responseDto.userUUID(), userUUID);
+        assertEquals(responseDto.email(), "test@test.com");
+    }
+
+    @Test
+    void 만약_등록되지_않거나_삭제된_유저_UUID라면_예외가_반환된다() {
+        // given
+        String userUUID = "test";
+        given(userRepository.existsUserByUserUUIDAndIsDeletedFalse(userUUID)).willReturn(false);
+        // then
+        assertThrows(UserException.class, () -> userServiceImpl.getUserByUserUUID(userUUID));
+    }
+
+    @Test
+    void 유저_닉네임으로_유저를_찾을_수_있다() {
+        // given
+        String nickname = "test";
+        String email = "test@test.com";
+        User user = User.builder()
+            .nickname(nickname)
+            .email(email)
+            .build();
+        given(userRepository.existsUserByNicknameAndIsDeletedFalse(nickname)).willReturn(true);
+        given(userRepository.findByNicknameAndIsDeletedFalse(nickname)).willReturn(user);
+        // when
+        UserResponseDto responseDto = userServiceImpl.getUserByNickname(nickname);
+        // then
+        assertEquals(responseDto.nickname(), nickname);
+        assertEquals(responseDto.email(), email);
+    }
+
+    @Test
+    void 만약_등록되지_않거나_삭제된_유저_닉네임이라면_예외가_반환된다() {
+        // given
+        String nickname = "test";
+        given(userRepository.existsUserByNicknameAndIsDeletedFalse(nickname)).willReturn(false);
+        // then
+        assertThrows(UserException.class, () -> userServiceImpl.getUserByNickname(nickname));
     }
 }
