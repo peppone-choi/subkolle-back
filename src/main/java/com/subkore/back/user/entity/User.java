@@ -31,4 +31,8 @@ public class User {
     String role;
     @Default
     Boolean isDeleted = false;
+
+    public void passwordEncode(String password) {
+        this.password = password;
+    }
 }

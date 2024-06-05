@@ -8,6 +8,7 @@ import com.subkore.back.user.mapper.UserMapper;
 import com.subkore.back.user.repository.UserRepository;
 import com.subkore.back.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper = UserMapper.INSTANCE;
-
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Override
     public UserResponseDto createUser(CreateUserRequestDto createUserRequestDto) {
         if (userRepository.existsUserByEmailAndIsDeletedFalse(createUserRequestDto.email())) {
             throw new UserException("이미 등록된 이메일입니다.");
         }
         User user = userMapper.createUserRequestDtoToUser(createUserRequestDto);
+        user.passwordEncode(bCryptPasswordEncoder.encode(createUserRequestDto.password()));
         User savedUser = userRepository.save(user);
         return userMapper.userToUserResponseDto(savedUser);
     }

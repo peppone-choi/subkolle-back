@@ -18,6 +18,7 @@ import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceTest {
     @Mock
     UserRepository userRepository;
+    @Mock
+    BCryptPasswordEncoder bCryptPasswordEncoder;
     @InjectMocks
     UserServiceImpl userServiceImpl;
 
