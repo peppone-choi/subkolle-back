@@ -10,8 +10,11 @@ import com.subkore.back.exception.UserException;
 import com.subkore.back.user.dto.CreateUserRequestDto;
 import com.subkore.back.user.dto.UserResponseDto;
 import com.subkore.back.user.entity.User;
+import com.subkore.back.user.enumerate.Role;
 import com.subkore.back.user.repository.UserRepository;
 import com.subkore.back.user.service.Impl.UserServiceImpl;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalAnswers;
@@ -39,16 +42,7 @@ public class UserServiceTest {
             .password("test")
             .nickname("test")
             .profileImage("test")
-            .role("test").build();
-        User user = User.builder()
-                    .userUUID("test")
-                    .email("test@test.com")
-                    .password("test")
-                    .nickname("test")
-                    .profileImage("test")
-                    .role("test")
-            .isDeleted(false)
-            .build();
+            .role(new ArrayList<>(List.of("USER"))).build();
         when(userRepository.save(any(User.class))).then(AdditionalAnswers.returnsFirstArg());
         // when
         UserResponseDto responseDto = userServiceImpl.createUser(createUserRequestDto);
@@ -56,7 +50,7 @@ public class UserServiceTest {
         assertEquals(responseDto.email(), "test@test.com");
         assertEquals(responseDto.nickname(), "test");
         assertEquals(responseDto.profileImage(), "test");
-        assertEquals(responseDto.role(), "test");
+        assertEquals(responseDto.role(), List.of("USER"));
     }
     @Test
     void 만약_등록된_유저라면_예외가_반환된다() {
@@ -66,7 +60,7 @@ public class UserServiceTest {
             .password("test")
             .nickname("test")
             .profileImage("test")
-            .role("test").build();
+            .role(List.of("USER")).build();
         when(userRepository.existsUserByEmailAndIsDeletedFalse(createUserRequestDto.email())).thenReturn(true);
         // then
         assertThrows(UserException.class, () -> userServiceImpl.createUser(createUserRequestDto));
@@ -81,7 +75,7 @@ public class UserServiceTest {
             .password("test")
             .nickname("test")
             .profileImage("test")
-            .role("test")
+            .role(List.of(Role.USER))
             .isDeleted(false)
             .build();
         when(userRepository.existsUserByEmailAndIsDeletedFalse(email)).thenReturn(true);

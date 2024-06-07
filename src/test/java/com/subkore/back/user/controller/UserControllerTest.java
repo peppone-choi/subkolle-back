@@ -16,7 +16,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.subkore.back.exception.UserException;
 import com.subkore.back.user.dto.CreateUserRequestDto;
 import com.subkore.back.user.dto.UserResponseDto;
+import com.subkore.back.user.mapper.UserMapper;
 import com.subkore.back.user.service.UserService;
+import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,7 @@ public class UserControllerTest {
     private UserService userService;
     @Autowired
     private MockMvc mockMvc;
-
+    private final UserMapper userMapper = UserMapper.INSTANCE;
     @Test
     @WithMockUser
     void 유저를_등록할_수_있다() throws Exception {
@@ -45,15 +47,10 @@ public class UserControllerTest {
             .nickname("test")
             .password("test")
             .profileImage("test")
-            .role("test")
+            .role(List.of("USER"))
             .build();
         given(userService.createUser(any()))
-            .willReturn(UserResponseDto.builder()
-                .email(userDto.email())
-                .nickname(userDto.nickname())
-                .profileImage(userDto.profileImage())
-                .role(userDto.role())
-                .build());
+            .willReturn(userMapper.userToUserResponseDto(userMapper.createUserRequestDtoToUser(userDto)));
         // when
         // then
         mockMvc.perform(post("/api/v1/users")
@@ -66,7 +63,7 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.email").value(userDto.email()))
             .andExpect(jsonPath("$.nickname").value(userDto.nickname()))
             .andExpect(jsonPath("$.profileImage").value(userDto.profileImage()))
-            .andExpect(jsonPath("$.role").value(userDto.role()));
+            .andExpect(jsonPath("$.role").value("USER"));
 
     }
 
@@ -79,7 +76,7 @@ public class UserControllerTest {
             .password("test")
             .nickname("test")
             .profileImage("test")
-            .role("test")
+            .role(List.of("USER"))
             .build();
         given(userService.createUser(any())).willThrow(new UserException("이미 등록된 이메일입니다."));
         // when
@@ -108,7 +105,7 @@ public class UserControllerTest {
                 .email(email)
                 .nickname("test")
                 .profileImage("test")
-                .role("test")
+                .role(List.of("USER"))
                 .build());
         // when
         // then
@@ -120,7 +117,7 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.email").value(email))
             .andExpect(jsonPath("$.nickname").value("test"))
             .andExpect(jsonPath("$.profileImage").value("test"))
-            .andExpect(jsonPath("$.role").value("test"));
+            .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test

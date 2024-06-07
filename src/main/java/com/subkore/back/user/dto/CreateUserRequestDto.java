@@ -1,5 +1,6 @@
 package com.subkore.back.user.dto;
 
+import java.util.List;
 import lombok.Builder;
 
 @Builder
@@ -8,7 +9,7 @@ public record CreateUserRequestDto(
     String nickname,
     String password,
     String profileImage,
-    String role
+    List<String> role
 ) {
 
 }

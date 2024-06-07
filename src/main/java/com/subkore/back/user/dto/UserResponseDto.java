@@ -1,5 +1,6 @@
 package com.subkore.back.user.dto;
 
+import java.util.List;
 import lombok.Builder;
 
 @Builder
@@ -9,7 +10,7 @@ public record UserResponseDto(
     String email,
     String nickname,
     String profileImage,
-    String role
+    List<String> role
 ) {
 
 }
